@@ -1,0 +1,1564 @@
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>잇다 (ITDA) - 부경대학교 1분 컷 물품 대여 플랫폼</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Noto Sans KR & Pretendard Fallback -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Noto Sans KR"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              green: '#10B981',
+              greenDark: '#059669',
+              greenLight: '#ECFDF5',
+              blue: '#3B82F6',
+              blueDark: '#2563EB',
+              blueLight: '#EFF6FF',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom Scrollbar Hide for App-like Feel */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    body {
+      background-color: #F1F5F9;
+      -webkit-tap-highlight-color: transparent;
+    }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.7; }
+      50% { transform: scale(1.05); opacity: 0.3; }
+      100% { transform: scale(0.95); opacity: 0.7; }
+    }
+    .qr-pulse {
+      animation: pulse-ring 2.5s infinite ease-in-out;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); opacity: 0.5; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .animate-slide-up {
+      animation: slideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+<body class="font-sans text-slate-800 antialiased flex justify-center min-h-screen">
+
+  <!-- Mobile App Shell Container -->
+  <div id="app-shell" class="w-full max-w-[430px] bg-slate-50 min-h-screen sm:min-h-[844px] sm:my-4 sm:rounded-[36px] sm:shadow-2xl sm:border sm:border-slate-200/80 relative flex flex-col overflow-hidden">
+    
+    <!-- Top Sticky App Header -->
+    <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-100 px-4 pt-3 pb-2.5">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500 to-blue-600 flex items-center justify-center text-white font-extrabold text-sm shadow-sm">
+            잇
+          </div>
+          <div>
+            <div class="flex items-center gap-1">
+              <span class="font-extrabold text-[16px] tracking-tight text-slate-900">잇다</span>
+              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600 border border-blue-200">PKNU 대연캠퍼스</span>
+            </div>
+            <button onclick="openCampusModal()" class="flex items-center gap-0.5 text-[11px] text-slate-500 hover:text-slate-800 transition">
+              <span id="selected-campus">부경대학교 중앙도서관·나비센터·백경광장 통합</span>
+              <i data-lucide="chevron-down" class="w-3 h-3"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+          <button onclick="showToast('연락처 노출 없는 익명 인앱 알림이 켜져 있습니다 🔔')" class="relative p-2 rounded-full hover:bg-slate-100 text-slate-600 transition" aria-label="알림">
+            <i data-lucide="bell" class="w-5 h-5"></i>
+            <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white"></span>
+          </button>
+          <button onclick="switchTab('qr')" class="px-2.5 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-semibold flex items-center gap-1 shadow-sm active:scale-95 transition">
+            <i data-lucide="qr-code" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <span>학생증</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Scrollable Content Area -->
+    <main id="main-content" class="flex-1 overflow-y-auto no-scrollbar pb-24">
+      
+      <!-- ==================== TAB 1: HOME ==================== -->
+      <section id="tab-home" class="p-4 space-y-4">
+        
+        <!-- Urgent SOS Banner (Survey Pain Point: 긴급 상황 즉시 해결) -->
+        <div class="bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl p-3.5 text-white shadow-md relative overflow-hidden">
+          <div class="flex items-center justify-between gap-2.5">
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5 mb-1">
+                <span class="px-2 py-0.5 rounded-md bg-white/25 text-[10px] font-extrabold tracking-tight animate-pulse">🚨 실시간 긴급 SOS</span>
+                <span class="text-[10px] text-amber-100">방금 전 · 중앙도서관</span>
+              </div>
+              <p id="sos-banner-text" class="text-xs font-bold truncate">"지금 중앙도서관인데 C타입 충전기 2시간만 빌려주실 분!"</p>
+            </div>
+            <button onclick="respondToSos()" class="shrink-0 px-3 py-2 rounded-xl bg-slate-900 text-white text-[11px] font-bold shadow-xs active:scale-95 transition">
+              익명 채팅응답
+            </button>
+          </div>
+        </div>
+
+        <!-- Active Rental Live Banner (Dynamic) -->
+        <div id="home-active-banner" class="bg-gradient-to-r from-slate-900 via-slate-800 to-blue-950 rounded-2xl p-4 text-white shadow-lg relative overflow-hidden">
+          <div class="absolute -right-6 -top-6 w-28 h-28 bg-emerald-500/20 rounded-full blur-xl"></div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+              현재 대여 중 · 반납 30분 전 자동알림
+            </span>
+            <span id="banner-timer" class="font-mono text-sm font-bold text-amber-300">02:44:59 남음</span>
+          </div>
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <h3 id="banner-item-name" class="font-bold text-base text-white">C타입 65W 고속충전기 세트</h3>
+              <p id="banner-item-loc" class="text-xs text-slate-300 mt-0.5 flex items-center gap-1">
+                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-emerald-400"></i>
+                거점: 중앙도서관 정문 무인보관함 A-3
+              </p>
+            </div>
+            <div class="flex flex-col gap-1.5 shrink-0">
+              <button onclick="extendActiveRental()" class="px-3 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-xs font-semibold text-white backdrop-blur-sm transition">
+                +2시간 연장
+              </button>
+              <button onclick="switchTab('rentals')" class="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-xs font-bold text-white shadow transition">
+                인증샷 반납
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="relative">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+          <input 
+            id="search-input"
+            type="text" 
+            oninput="renderItems()"
+            placeholder="우산, 충전기, 공학계산기, 전공책, 상비약 검색" 
+            class="w-full pl-10 pr-4 py-3 bg-white border border-slate-200/90 rounded-2xl text-sm placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/15 shadow-sm transition"
+          />
+        </div>
+
+        <!-- PKNU Campus Hubs ('잇다존' 거점 필터) -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+              <i data-lucide="map-pin" class="w-4 h-4 text-blue-600"></i>
+              부경대 '잇다존' 거점 <span class="text-xs font-normal text-slate-400">(헛걸음 방지 실시간 재고)</span>
+            </h2>
+          </div>
+          <div id="location-pills" class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+
+        <!-- Category Grid (Survey Top 5 + Emergency Consumables) -->
+        <div>
+          <div class="flex items-center justify-between mb-2.5">
+            <h2 class="text-sm font-bold text-slate-800">설문 수요 Top 5 & 비상물품</h2>
+            <button onclick="resetFilters()" class="text-xs text-slate-400 hover:text-emerald-600 font-medium">전체보기</button>
+          </div>
+          <div id="category-grid" class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+
+        <!-- Real-time Available Items List -->
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <h2 class="text-sm font-bold text-slate-900">1분 컷 즉시 대여 · 무료 비상물품</h2>
+              <p class="text-[11px] text-slate-400">거점 무인보관함 공용물품 & 학우 P2P 공유물품 통합</p>
+            </div>
+            <label class="inline-flex items-center gap-1.5 cursor-pointer select-none bg-white px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-600">
+              <input id="only-available-toggle" type="checkbox" checked onchange="renderItems()" class="accent-emerald-500 rounded">
+              <span>재고있음만</span>
+            </label>
+          </div>
+
+          <div id="items-list" class="space-y-3">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+
+        <!-- Survey Data Evidence Card -->
+        <div class="bg-blue-50/80 border border-blue-100 rounded-2xl p-4">
+          <div class="flex items-start gap-3">
+            <div class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 mt-0.5">
+              <i data-lucide="shield-alert" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-blue-950">부경대 설문조사(N=20, 필요성 80% 동의) 기반 설계</h4>
+              <p class="text-[11px] text-blue-800/80 leading-relaxed mt-1">
+                <b>연락처 비동의 45%</b> 의견을 반영해 전화번호·카톡 노출 없는 <b>익명 인앱 채팅</b>과 <b>중앙도서관·나비센터 무인보관함</b> 방식을 적용했습니다.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 2: ANONYMOUS IN-APP CHAT & MY RENTALS ==================== -->
+      <section id="tab-rentals" class="hidden p-4 space-y-5">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-extrabold text-slate-900">안심 인앱 채팅 · 대여현황</h2>
+            <p class="text-xs text-slate-500 mt-0.5">연락처 교환 없이 거점 직거래 약속 및 반납 관리</p>
+          </div>
+          <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-bold border border-emerald-200">
+            번호 비공개 보호중
+          </span>
+        </div>
+
+        <!-- Anonymous In-App Chat Simulator Card -->
+        <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
+          <div class="bg-slate-900 text-white px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-full bg-emerald-500 flex items-center justify-center text-xs font-extrabold">백</div>
+              <div>
+                <p class="text-xs font-bold flex items-center gap-1">
+                  익명 백경이 #204 <span class="text-[10px] px-1.5 py-0.2 rounded bg-white/15 text-emerald-300">잇다온도 39.2°C</span>
+                </p>
+                <p class="text-[10px] text-slate-300">중앙도서관 정문 도서반납기 앞 직거래</p>
+              </div>
+            </div>
+            <span class="text-[10px] text-emerald-300 font-semibold">재학생 인증됨</span>
+          </div>
+
+          <div id="chat-messages" class="p-3.5 space-y-2.5 max-h-48 overflow-y-auto bg-slate-50/70 text-xs">
+            <div class="flex flex-col items-start">
+              <span class="text-[10px] text-slate-400 mb-0.5">익명 백경이 #204 · 13:22</span>
+              <div class="bg-white border border-slate-200/80 text-slate-800 px-3 py-2 rounded-2xl rounded-tl-xs shadow-2xs max-w-[82%]">
+                안녕하세요! 중앙도서관 1층 정문 도서반납기 옆에서 전공책(데이터구조론) 건네드릴 수 있어요 😊
+              </div>
+            </div>
+            <div class="flex flex-col items-end">
+              <span class="text-[10px] text-slate-400 mb-0.5">나 (익명 #108) · 13:24</span>
+              <div class="bg-emerald-500 text-white px-3 py-2 rounded-2xl rounded-tr-xs shadow-2xs max-w-[82%]">
+                감사합니다! 지금 열람실에서 내려가고 있어요. 반납은 내일 13시까지 같은 자리에서 드릴게요!
+              </div>
+            </div>
+          </div>
+
+          <form onsubmit="sendChatMessage(event)" class="p-2.5 bg-white border-t border-slate-100 flex gap-2">
+            <input id="chat-input" type="text" placeholder="개인 연락처 없이 안전하게 메시지 보내기..." class="flex-1 px-3 py-2 rounded-xl bg-slate-100 text-xs focus:outline-none focus:bg-white focus:ring-1 focus:ring-emerald-500">
+            <button type="submit" class="px-3.5 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold shrink-0">전송</button>
+          </form>
+        </div>
+
+        <!-- Active Rentals Container -->
+        <div>
+          <h3 class="text-sm font-bold text-slate-800 mb-2.5">내 실시간 대여 타이머</h3>
+          <div id="active-rentals-container" class="space-y-3">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+
+        <!-- Past History -->
+        <div>
+          <h3 class="text-sm font-bold text-slate-800 mb-2.5">지난 대여 내역</h3>
+          <div id="past-rentals-container" class="space-y-2.5">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 3: QR PASS ==================== -->
+      <section id="tab-qr" class="hidden p-4 space-y-4">
+        <div class="text-center pt-1">
+          <span class="inline-block px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold border border-blue-200">
+            부경대 포털 재학생 인증 · 거점 무인보관함 패스
+          </span>
+          <h2 class="text-lg font-extrabold text-slate-900 mt-2">모바일 학생증 QR 인증</h2>
+          <p class="text-xs text-slate-500">중앙도서관·나비센터 잇다존 키오스크에 스캔하세요</p>
+        </div>
+
+        <!-- QR Card -->
+        <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-lg text-center relative overflow-hidden">
+          <div class="flex items-center justify-between text-left border-b border-slate-100 pb-4 mb-5">
+            <div>
+              <p class="text-[11px] text-slate-400 font-medium">부경대학교 정보융합대학 · 재학</p>
+              <h3 class="text-base font-extrabold text-slate-900">익명 백경이 #108 <span class="text-xs font-normal text-slate-500">(실명 비공개)</span></h3>
+            </div>
+            <div class="text-right">
+              <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 text-[11px] font-bold">
+                <i data-lucide="thermometer" class="w-3.5 h-3.5"></i>
+                잇다온도 38.5°C
+              </span>
+            </div>
+          </div>
+
+          <!-- Simulated SVG QR Code -->
+          <div class="relative inline-flex items-center justify-center p-4 bg-white rounded-2xl border-2 border-emerald-500/30 shadow-inner">
+            <div class="absolute inset-0 rounded-2xl border-2 border-emerald-400 qr-pulse pointer-events-none"></div>
+            <svg class="w-44 h-44 text-slate-900" viewBox="0 0 100 100" fill="currentColor">
+              <path d="M10 10h25v25H10V10zm5 5v15h15V15H15zm5 5h5v5h-5v-5z"/>
+              <path d="M65 10h25v25H65V10zm5 5v15h15V15H70zm5 5h5v5h-5v-5z"/>
+              <path d="M10 65h25v25H10V65zm5 5v15h15V70H15zm5 5h5v5h-5v-5z"/>
+              <rect x="42" y="12" width="5" height="5"/><rect x="52" y="12" width="5" height="10"/>
+              <rect x="42" y="22" width="5" height="10"/><rect x="47" y="32" width="10" height="5"/>
+              <rect x="12" y="42" width="10" height="5"/><rect x="27" y="42" width="5" height="10"/>
+              <rect x="37" y="42" width="15" height="5"/><rect x="57" y="42" width="10" height="5"/>
+              <rect x="72" y="42" width="15" height="5"/><rect x="17" y="52" width="5" height="5"/>
+              <rect x="42" y="52" width="5" height="15"/><rect x="52" y="52" width="10" height="5"/>
+              <rect x="67" y="52" width="5" height="10"/><rect x="82" y="52" width="5" height="15"/>
+              <rect x="42" y="72" width="10" height="5"/><rect x="57" y="67" width="5" height="15"/>
+              <rect x="67" y="72" width="15" height="5"/><rect x="47" y="82" width="5" height="8"/>
+              <rect x="67" y="82" width="10" height="8"/><rect x="82" y="82" width="8" height="8"/>
+            </svg>
+          </div>
+
+          <div class="mt-4 flex items-center justify-center gap-2 text-xs text-slate-500">
+            <span>인증 유효시간</span>
+            <span id="qr-timer" class="font-mono font-bold text-emerald-600">02:59</span>
+            <button onclick="resetQrTimer()" class="p-1 rounded-full hover:bg-slate-100 text-slate-600" title="새로고침">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+
+          <!-- Locker PIN Box -->
+          <div class="mt-5 bg-slate-50 rounded-2xl p-3.5 border border-slate-200/80 flex items-center justify-between">
+            <div class="text-left">
+              <p class="text-[11px] text-slate-400">거점 무인보관함 수동 개방 PIN</p>
+              <p class="text-sm font-extrabold text-slate-800 tracking-widest mt-0.5"># 4829 *</p>
+            </div>
+            <button onclick="copyPin()" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-100 active:scale-95 transition">
+              번호 복사
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 4: EMERGENCY CONSUMABLES & SOS / REQUEST ==================== -->
+      <section id="tab-request" class="hidden p-4 space-y-5">
+        <div>
+          <span class="text-[11px] font-bold text-rose-600 bg-rose-50 px-2.5 py-0.5 rounded-full">반납 불필요 소모품 · 긴급 SOS</span>
+          <h2 class="text-lg font-extrabold text-slate-900 mt-1.5">비상물품 무료 비치 & 긴급 요청</h2>
+          <p class="text-xs text-slate-500 mt-0.5">상비약·여성용품은 교내 비치 위치를 바로 확인하고, 필요한 물건은 SOS를 띄워보세요.</p>
+        </div>
+
+        <!-- Free Emergency Consumables Location Guide (기획안 ④ 반영) -->
+        <div class="bg-rose-50/70 border border-rose-200/80 rounded-2xl p-4 space-y-2.5">
+          <h3 class="text-xs font-extrabold text-rose-900 flex items-center gap-1.5">
+            <i data-lucide="heart-pulse" class="w-4 h-4 text-rose-500"></i>
+            반납 없는 무료 나눔 · 교내 비상물품 비치 현황
+          </h3>
+          <div class="grid grid-cols-1 gap-2 text-xs">
+            <div class="bg-white p-3 rounded-xl border border-rose-100 flex items-center justify-between">
+              <div>
+                <p class="font-bold text-slate-800">💊 상비약 (타이레놀·소화제·연고·밴드)</p>
+                <p class="text-[11px] text-slate-500 mt-0.5">나비센터 2층 보건진료소 / 학생회관 2층 총학생회실</p>
+              </div>
+              <span class="px-2 py-1 rounded-lg bg-emerald-50 text-emerald-700 text-[10px] font-bold shrink-0">무료제공</span>
+            </div>
+            <div class="bg-white p-3 rounded-xl border border-rose-100 flex items-center justify-between">
+              <div>
+                <p class="font-bold text-slate-800">🩹 비상 여성용품 무료 자판기</p>
+                <p class="text-[11px] text-slate-500 mt-0.5">중앙도서관 1층 여자화장실 앞 / 학생회관 1층 로비</p>
+              </div>
+              <span class="px-2 py-1 rounded-lg bg-emerald-50 text-emerald-700 text-[10px] font-bold shrink-0">여유있음</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SOS / Item Request Form Card -->
+        <form onsubmit="submitNewRequest(event)" class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm space-y-3">
+          <h3 class="text-sm font-bold text-slate-900">긴급 SOS / 신규 물품 등록</h3>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">필요한 물품명</label>
+            <input id="req-item-name" type="text" required placeholder="예: C타입 노트북 충전기, 공학용 계산기, 우산" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:border-emerald-500 focus:bg-white">
+          </div>
+          <div class="grid grid-cols-2 gap-2.5">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">희망 잇다존 거점</label>
+              <select id="req-item-loc" class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-700 focus:outline-none focus:border-emerald-500">
+                <option value="중앙도서관">중앙도서관(정문 반납기)</option>
+                <option value="나비센터">나비센터(앞문)</option>
+                <option value="백경광장">백경광장</option>
+                <option value="기숙사 편의점">기숙사 편의점(GS25)</option>
+                <option value="학생회관">학생회관</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">희망 대여 시간</label>
+              <select id="req-item-duration" class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-700 focus:outline-none focus:border-emerald-500">
+                <option value="2시간">2시간 (초단기)</option>
+                <option value="4시간">4시간</option>
+                <option value="12시간">12시간</option>
+                <option value="1일" selected>1일 (가장 선호)</option>
+                <option value="2일">2일</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">한줄 요청 메시지</label>
+            <input id="req-item-reason" type="text" placeholder="지금 중앙도서관인데 2시간만 빌려주실 학우분 찾아요!" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs focus:outline-none focus:border-emerald-500 focus:bg-white">
+          </div>
+          <button type="submit" class="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm shadow-sm active:scale-[0.99] transition">
+            긴급 SOS / 물품 요청 띄우기
+          </button>
+        </form>
+
+        <!-- Student Upvote / SOS Feed -->
+        <div>
+          <div class="flex items-center justify-between mb-2.5">
+            <h3 class="text-sm font-bold text-slate-800">실시간 학우 SOS & 물품 제안</h3>
+            <span class="text-[11px] text-emerald-600 font-semibold">익명 채팅 즉시 연결</span>
+          </div>
+          <div id="requests-list" class="space-y-2.5">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 5: MY PAGE ==================== -->
+      <section id="tab-mypage" class="hidden p-4 space-y-4">
+        <div class="bg-white rounded-2xl p-4 border border-slate-200/80 flex items-center gap-3.5 shadow-sm">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-500 to-blue-500 text-white font-extrabold text-xl flex items-center justify-center shadow">
+            백
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-1.5">
+              <h3 class="font-extrabold text-base text-slate-900">익명 백경이 #108</h3>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">부경대 포털 인증</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-0.5">연락처 비공개 모드 활성화 중</p>
+            <p class="text-[11px] text-emerald-600 font-bold mt-1">잇다 온도 38.5°C · 제시간 반납 100%</p>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-3 gap-2.5">
+          <div class="bg-white p-3.5 rounded-2xl border border-slate-100 text-center">
+            <p class="text-[11px] text-slate-400">이용 횟수</p>
+            <p class="text-lg font-extrabold text-slate-900 mt-0.5">12건</p>
+          </div>
+          <div class="bg-white p-3.5 rounded-2xl border border-slate-100 text-center">
+            <p class="text-[11px] text-slate-400">절약 비용</p>
+            <p class="text-lg font-extrabold text-emerald-600 mt-0.5">54,000원</p>
+          </div>
+          <div class="bg-white p-3.5 rounded-2xl border border-slate-100 text-center">
+            <p class="text-[11px] text-slate-400">잇다 온도</p>
+            <p class="text-lg font-extrabold text-blue-600 mt-0.5">38.5°C</p>
+          </div>
+        </div>
+
+        <!-- Settings Menu -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 divide-y divide-slate-100 overflow-hidden">
+          <div class="p-4 flex items-center justify-between">
+            <div>
+              <p class="text-sm font-bold text-slate-800">반납 30분 전 자동 푸시 알림</p>
+              <p class="text-[11px] text-slate-400">연체 방지 및 다음 학우 대여 보호</p>
+            </div>
+            <input type="checkbox" checked onchange="showToast('반납 30분 전 자동 알림이 설정되었습니다.')" class="w-5 h-5 accent-emerald-500 rounded">
+          </div>
+          <div class="p-4 flex items-center justify-between">
+            <div>
+              <p class="text-sm font-bold text-slate-800">개인 연락처(전화번호·카톡) 완전 차단</p>
+              <p class="text-[11px] text-slate-400">모든 소통은 앱 내 익명 채팅으로만 진행</p>
+            </div>
+            <input type="checkbox" checked onchange="showToast('프라이버시 보호 모드가 유지됩니다.')" class="w-5 h-5 accent-emerald-500 rounded">
+          </div>
+          <button onclick="openLockerMapModal()" class="w-full p-4 flex items-center justify-between text-left hover:bg-slate-50 transition">
+            <div>
+              <p class="text-sm font-bold text-slate-800">부경대 5대 '잇다존' 거점 위치 안내</p>
+              <p class="text-[11px] text-slate-400">중앙도서관, 나비센터, 백경광장, 기숙사 GS25, 학생회관</p>
+            </div>
+            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
+          </button>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="sticky bottom-0 z-30 bg-white/95 backdrop-blur-md border-t border-slate-200/80 px-2 py-1.5 grid grid-cols-5 items-center">
+      <button onclick="switchTab('home')" data-tab="home" class="nav-btn flex flex-col items-center justify-center py-1.5 text-emerald-600">
+        <i data-lucide="home" class="w-5 h-5"></i>
+        <span class="text-[10px] font-bold mt-1">홈</span>
+      </button>
+      <button onclick="switchTab('rentals')" data-tab="rentals" class="nav-btn relative flex flex-col items-center justify-center py-1.5 text-slate-400 hover:text-slate-600">
+        <i data-lucide="message-circle" class="w-5 h-5"></i>
+        <span id="nav-rental-badge" class="absolute top-1 right-4 w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center">1</span>
+        <span class="text-[10px] font-medium mt-1">채팅·대여</span>
+      </button>
+      <button onclick="switchTab('qr')" data-tab="qr" class="nav-btn flex flex-col items-center justify-center -mt-4">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-blue-600 text-white flex items-center justify-center shadow-lg shadow-emerald-500/30 border-2 border-white">
+          <i data-lucide="scan-line" class="w-5 h-5"></i>
+        </div>
+        <span class="text-[10px] font-bold text-slate-700 mt-1">QR보관함</span>
+      </button>
+      <button onclick="switchTab('request')" data-tab="request" class="nav-btn flex flex-col items-center justify-center py-1.5 text-slate-400 hover:text-slate-600">
+        <i data-lucide="siren" class="w-5 h-5"></i>
+        <span class="text-[10px] font-medium mt-1">비상·SOS</span>
+      </button>
+      <button onclick="switchTab('mypage')" data-tab="mypage" class="nav-btn flex flex-col items-center justify-center py-1.5 text-slate-400 hover:text-slate-600">
+        <i data-lucide="user" class="w-5 h-5"></i>
+        <span class="text-[10px] font-medium mt-1">마이잇다</span>
+      </button>
+    </nav>
+
+    <!-- ==================== MODAL: ITEM DETAIL & RENTAL DRAWER ==================== -->
+    <div id="item-modal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-end sm:items-center justify-center">
+      <div class="w-full max-w-[430px] bg-white rounded-t-3xl sm:rounded-3xl p-5 animate-slide-up max-h-[90vh] overflow-y-auto">
+        <div class="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-4 sm:hidden"></div>
+        <div id="item-modal-body">
+          <!-- Injected by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== MODAL: RETURN PHOTO VERIFICATION ==================== -->
+    <div id="return-modal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-end sm:items-center justify-center">
+      <div class="w-full max-w-[430px] bg-white rounded-t-3xl sm:rounded-3xl p-5 animate-slide-up">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-extrabold text-base text-slate-900">비대면 반납 상태 인증</h3>
+          <button onclick="closeReturnModal()" class="p-1.5 rounded-full hover:bg-slate-100 text-slate-500">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        <p class="text-xs text-slate-500 mb-4">다음 학우를 위해 물품 이상 유무를 확인하고 보관함에 넣은 사진을 찍어주세요.</p>
+        
+        <div id="photo-upload-box" onclick="simulatePhotoCapture()" class="border-2 border-dashed border-slate-300 hover:border-emerald-500 rounded-2xl p-6 text-center cursor-pointer bg-slate-50 transition mb-4">
+          <div id="photo-placeholder">
+            <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-2">
+              <i data-lucide="camera" class="w-6 h-6"></i>
+            </div>
+            <p class="text-xs font-bold text-slate-700">터치하여 보관함 반납 인증샷 촬영</p>
+            <p class="text-[11px] text-slate-400 mt-0.5">케이블 단선·파손 여부가 보이게 촬영해주세요</p>
+          </div>
+          <div id="photo-captured" class="hidden">
+            <div class="w-full h-32 rounded-xl bg-gradient-to-br from-emerald-50 to-blue-50 border border-emerald-200 flex flex-col items-center justify-center text-emerald-700">
+              <i data-lucide="check-circle-2" class="w-8 h-8 text-emerald-500 mb-1"></i>
+              <p class="text-xs font-bold">상태 인증샷 촬영 완료!</p>
+              <p class="text-[10px] text-slate-500">AI 외관 파손 1차 검수 통과 (정상)</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-2 mb-4 text-xs text-slate-600">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input id="chk-clean" type="checkbox" checked class="accent-emerald-500 rounded">
+            <span>구성품(케이블, 케이스 등) 누락 없이 반납했습니다.</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input id="chk-door" type="checkbox" checked class="accent-emerald-500 rounded">
+            <span>스마트 보관함 문이 완전히 잠긴 것을 확인했습니다.</span>
+          </label>
+        </div>
+
+        <button onclick="confirmReturn()" class="w-full py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm shadow-md transition">
+          반납 완료 처리하기
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================== MODAL: LOCKER MAP & CAMPUS SELECTOR ==================== -->
+    <div id="info-modal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+      <div class="w-full max-w-[390px] bg-white rounded-3xl p-5 shadow-xl">
+        <div class="flex items-center justify-between mb-3">
+          <h3 id="info-modal-title" class="font-extrabold text-base text-slate-900">캠퍼스 스마트 보관함 안내</h3>
+          <button onclick="closeInfoModal()" class="p-1.5 rounded-full hover:bg-slate-100 text-slate-500">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        <div id="info-modal-content" class="space-y-2.5 text-xs text-slate-600"></div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="hidden fixed bottom-20 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-lg whitespace-nowrap">
+    </div>
+
+  </div>
+
+  <script>
+    // ==================== DATA STATE (PKNU '잇다' Survey Data) ====================
+    const locations = ['전체', '중앙도서관', '나비센터', '백경광장', '기숙사 편의점', '학생회관'];
+    
+    // Survey Top 5 Demand: 우산(85%), 충전기(65%), 공학계산기(40%), 전공책(35%), 필기구(25%) + 비상소모품
+    const categories = [
+      { id: 'all', name: '전체', icon: 'layout-grid', color: 'bg-slate-100 text-slate-700' },
+      { id: 'umbrella', name: '우산(85%)', icon: 'umbrella', color: 'bg-blue-50 text-blue-600' },
+      { id: 'charger', name: '충전기(65%)', icon: 'battery-charging', color: 'bg-emerald-50 text-emerald-600' },
+      { id: 'calculator', name: '공학계산기', icon: 'calculator', color: 'bg-amber-50 text-amber-600' },
+      { id: 'textbook', name: '전공책', icon: 'book-open', color: 'bg-indigo-50 text-indigo-600' },
+      { id: 'stationery', name: '필기구', icon: 'pen-tool', color: 'bg-purple-50 text-purple-600' },
+      { id: 'emergency', name: '상비약·비상', icon: 'heart-pulse', color: 'bg-rose-50 text-rose-600' },
+    ];
+
+    const durationOptions = ['2시간', '4시간', '6시간', '12시간', '1일', '2일', '3일'];
+    let selectedDuration = '1일';
+    let selectedTradeMethod = 'locker'; // 'locker' or 'direct'
+
+    let rentalItems = [
+      {
+        id: 1,
+        name: '부경대 공유 장우산 (방풍 8살)',
+        category: 'umbrella',
+        location: '중앙도서관',
+        detailLoc: '중앙도서관 정문 도서반납기 근처 잇다존 A-1',
+        available: 12,
+        total: 18,
+        defaultDuration: '1일 (시간단위 가능)',
+        lastSanitized: '건조 및 살균 완료',
+        popularTag: '희망 1위 (85%)',
+        tradeType: '거점 무인보관함',
+        ownerInfo: '공용 비치 물품',
+        icon: 'umbrella',
+        iconBg: 'bg-blue-100 text-blue-600',
+        desc: '갑작스러운 비에도 헛걸음 없이 중앙도서관 정문 보관함에서 QR로 즉시 꺼내 쓸 수 있습니다.'
+      },
+      {
+        id: 2,
+        name: 'C타입 65W 고속충전기 + 멀티케이블',
+        category: 'charger',
+        location: '나비센터',
+        detailLoc: '나비센터 앞문 1층 로비 무인보관함 B-2',
+        available: 5,
+        total: 10,
+        defaultDuration: '1일 (2~12시간 선택가능)',
+        lastSanitized: '단선·충전 테스트 완료',
+        popularTag: '희망 2위 (65%)',
+        tradeType: '거점 무인보관함',
+        ownerInfo: '공용 비치 물품',
+        icon: 'zap',
+        iconBg: 'bg-emerald-100 text-emerald-600',
+        desc: '노트북·아이패드·스마트폰 모두 고속충전 가능하며, 2시간/4시간 초단기 대여가 가능합니다.'
+      },
+      {
+        id: 3,
+        name: '카시오 공학용 계산기 (fx-570EX)',
+        category: 'calculator',
+        location: '중앙도서관',
+        detailLoc: '중앙도서관 정문 도서반납기 옆 보관함 A-4',
+        available: 4,
+        total: 8,
+        defaultDuration: '1일',
+        lastSanitized: '배터리 잔량 95% 확인',
+        popularTag: '희망 3위 (40%)',
+        tradeType: '무인보관함 / 직거래',
+        ownerInfo: '익명 백경이 #312 (39.1°C)',
+        icon: 'calculator',
+        iconBg: 'bg-amber-100 text-amber-600',
+        desc: '시험 직전 계산기를 놓고 왔을 때 1분 컷 대여! 사용 후 초기화하여 반납해주세요.'
+      },
+      {
+        id: 4,
+        name: '전공책 - C프로그래밍 / 데이터구조론',
+        category: 'textbook',
+        location: '백경광장',
+        detailLoc: '백경광장 벤치 앞 거점 직거래 또는 보관함',
+        available: 2,
+        total: 3,
+        defaultDuration: '1일 ~ 3일',
+        lastSanitized: '필기 흔적 없는 깨끗한 상태',
+        popularTag: '희망 4위 (35%)',
+        tradeType: '거점 직거래 (익명채팅)',
+        ownerInfo: '익명 백경이 #204 (39.2°C)',
+        icon: 'book-open',
+        iconBg: 'bg-indigo-100 text-indigo-600',
+        desc: '무겁게 전공책을 들고 오지 않았거나 과제 참고용으로 단기 대여가 필요한 학우분께 빌려드립니다.'
+      },
+      {
+        id: 5,
+        name: '시험용 필기구 풀세트 (컴싸·수정테이프·샤프)',
+        category: 'stationery',
+        location: '기숙사 편의점',
+        detailLoc: '기숙사 앞 편의점(GS25 부경대학사점) 옆 잇다함',
+        available: 7,
+        total: 10,
+        defaultDuration: '4시간 / 1일',
+        lastSanitized: '잉크 및 테이프 잔량 점검',
+        popularTag: '희망 5위 (25%)',
+        tradeType: '거점 무인보관함',
+        ownerInfo: '공용 비치 물품',
+        icon: 'pen-tool',
+        iconBg: 'bg-purple-100 text-purple-600',
+        desc: '아침 9시 시험 직전 기숙사 앞에서 바로 챙겨갈 수 있는 응급 필기구 파우치입니다.'
+      },
+      {
+        id: 6,
+        name: '[무료나눔] 상비약(타이레놀·연고) & 여성용품',
+        category: 'emergency',
+        location: '학생회관',
+        detailLoc: '학생회관 2층 총학생회실 / 나비센터 보건진료소',
+        available: 20,
+        total: 20,
+        defaultDuration: '반납 불필요 (무료 소모품)',
+        lastSanitized: '상시 보충 및 유통기한 관리',
+        popularTag: '비상 소모품 안내',
+        tradeType: '무료 비치 위치안내',
+        ownerInfo: '부경대 복지국·보건진료소',
+        isConsumable: true,
+        icon: 'heart-pulse',
+        iconBg: 'bg-rose-100 text-rose-600',
+        desc: '반납이 어려운 상비약과 여성용품은 일반 대여와 구분하여 교내 비치 장소에서 무료로 수령하실 수 있습니다.'
+      }
+    ];
+
+    let activeRentals = [
+      {
+        id: 101,
+        itemId: 2,
+        name: 'C타입 65W 고속충전기 세트',
+        location: '중앙도서관 정문 무인보관함 A-3',
+        rentedAt: '오늘 11:00 (1일 대여)',
+        remainingSeconds: 9899,
+        extended: false,
+        lockerCode: 'A-3'
+      }
+    ];
+
+    let pastRentals = [
+      { id: 901, name: '부경대 공유 장우산', location: '중앙도서관 → 나비센터 교차반납', date: '2026.11.15', status: '정상 반납완료' },
+      { id: 902, name: '카시오 공학용 계산기', location: '중앙도서관 정문 보관함', date: '2026.10.24', status: '정상 반납완료' }
+    ];
+
+    let studentRequests = [
+      { id: 1, name: 'C타입 충전기 2시간만 빌려주실 분! (긴급 SOS)', location: '중앙도서관', reason: '노트북 배터리가 5% 남았는데 충전기를 기숙사에 두고 왔어요 ㅠㅠ', votes: 14, voted: true, isSos: true },
+      { id: 2, name: '아이패드 애플펜슬 (2세대/USB-C)', location: '나비센터', reason: '수업 필기하려는데 펜슬이 고장나서 하루만 대여하고 싶습니다.', votes: 24, voted: false, isSos: false },
+      { id: 3, name: '면접용 정장 자켓 & 구두', location: '학생회관', reason: '단기 면접이나 발표 때 부담 없이 빌릴 수 있으면 좋겠어요.', votes: 19, voted: false, isSos: false }
+    ];
+
+    let selectedLocation = '전체';
+    let selectedCategory = 'all';
+    let returningRentalId = null;
+    let photoCaptured = false;
+    let qrSeconds = 179;
+
+    // ==================== INITIALIZATION ====================
+    document.addEventListener('DOMContentLoaded', () => {
+      renderLocations();
+      renderCategories();
+      renderItems();
+      renderActiveRentals();
+      renderPastRentals();
+      renderRequests();
+      startTimers();
+      lucide.createIcons();
+    });
+
+    // ==================== TAB NAVIGATION ====================
+    function switchTab(tabName) {
+      const tabs = ['home', 'rentals', 'qr', 'request', 'mypage'];
+      tabs.forEach(t => {
+        document.getElementById(`tab-${t}`).classList.add('hidden');
+      });
+      document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        const isTarget = btn.dataset.tab === tabName;
+        if (btn.dataset.tab === 'qr') return;
+        btn.classList.toggle('text-emerald-600', isTarget);
+        btn.classList.toggle('font-bold', isTarget);
+        btn.classList.toggle('text-slate-400', !isTarget);
+      });
+
+      document.getElementById('main-content').scrollTop = 0;
+      lucide.createIcons();
+    }
+
+    // ==================== RENDER FUNCTIONS ====================
+    function renderLocations() {
+      const container = document.getElementById('location-pills');
+      container.innerHTML = locations.map(loc => {
+        const active = selectedLocation === loc;
+        return `
+          <button onclick="selectLocation('${loc}')" class="px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition ${
+            active 
+              ? 'bg-slate-900 text-white shadow-sm' 
+              : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-100'
+          }">
+            ${loc}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectLocation(loc) {
+      selectedLocation = loc;
+      renderLocations();
+      renderItems();
+    }
+
+    function renderCategories() {
+      const container = document.getElementById('category-grid');
+      container.innerHTML = categories.map(cat => {
+        const active = selectedCategory === cat.id;
+        return `
+          <button onclick="selectCategory('${cat.id}')" class="shrink-0 flex flex-col items-center px-3 py-2 rounded-2xl transition ${
+            active ? 'bg-white ring-2 ring-emerald-500 shadow-sm' : 'bg-white/80 hover:bg-white border border-slate-100'
+          }">
+            <div class="w-9 h-9 rounded-xl ${cat.color} flex items-center justify-center mb-1">
+              <i data-lucide="${cat.icon}" class="w-4 h-4"></i>
+            </div>
+            <span class="text-[11px] font-bold text-slate-700 whitespace-nowrap">${cat.name}</span>
+          </button>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    function selectCategory(catId) {
+      selectedCategory = catId;
+      renderCategories();
+      renderItems();
+    }
+
+    function resetFilters() {
+      selectedLocation = '전체';
+      selectedCategory = 'all';
+      document.getElementById('search-input').value = '';
+      document.getElementById('only-available-toggle').checked = false;
+      renderLocations();
+      renderCategories();
+      renderItems();
+    }
+
+    function renderItems() {
+      const query = document.getElementById('search-input').value.trim().toLowerCase();
+      const onlyAvailable = document.getElementById('only-available-toggle').checked;
+
+      const filtered = rentalItems.filter(item => {
+        const matchLoc = selectedLocation === '전체' || item.location === selectedLocation;
+        const matchCat = selectedCategory === 'all' || item.category === selectedCategory;
+        const matchQuery = !query || item.name.toLowerCase().includes(query) || item.location.includes(query);
+        const matchAvail = !onlyAvailable || item.available > 0;
+        return matchLoc && matchCat && matchQuery && matchAvail;
+      });
+
+      const container = document.getElementById('items-list');
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white rounded-2xl p-8 text-center border border-slate-100">
+            <p class="text-sm font-bold text-slate-700">조건에 맞는 대여 물품이 없어요</p>
+            <p class="text-xs text-slate-400 mt-1">다른 단과대 보관함을 확인하거나 물품 요청을 남겨보세요!</p>
+            <button onclick="switchTab('request')" class="mt-3 px-4 py-2 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-bold">
+              필요한 물품 신청하기
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(item => {
+        const isAvailable = item.available > 0;
+        const isConsumable = Boolean(item.isConsumable);
+        return `
+          <div onclick="openItemModal(${item.id})" class="bg-white rounded-2xl p-3.5 border border-slate-200/80 shadow-xs hover:border-emerald-400 transition cursor-pointer flex items-center gap-3.5 active:scale-[0.99]">
+            <div class="w-14 h-14 rounded-2xl ${item.iconBg} flex items-center justify-center shrink-0">
+              <i data-lucide="${item.icon}" class="w-7 h-7"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-1.5 mb-0.5 flex-wrap">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                  isConsumable ? 'bg-rose-50 text-rose-600' : (isAvailable ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500')
+                }">
+                  ${isConsumable ? '무료나눔·비치안내' : (isAvailable ? `잔여 ${item.available}/${item.total}개` : '전량 대여중')}
+                </span>
+                <span class="text-[10px] font-semibold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-md">${item.location}</span>
+              </div>
+              <h3 class="font-bold text-sm text-slate-900 truncate">${item.name}</h3>
+              <p class="text-[11px] text-slate-400 mt-0.5 truncate">${item.tradeType} · ${item.popularTag}</p>
+            </div>
+            <div class="shrink-0">
+              <span class="inline-flex items-center justify-center px-3 py-2 rounded-xl text-xs font-bold ${
+                isConsumable 
+                  ? 'bg-rose-500 text-white shadow-xs'
+                  : (isAvailable ? 'bg-emerald-500 text-white shadow-xs' : 'bg-slate-100 text-slate-400')
+              }">
+                ${isConsumable ? '위치' : (isAvailable ? '대여' : '대기')}
+              </span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    // ==================== ITEM DETAIL & INSTANT RENTAL MODAL ====================
+    function openItemModal(itemId) {
+      const item = rentalItems.find(i => i.id === itemId);
+      if (!item) return;
+
+      const isAvailable = item.available > 0;
+      const isConsumable = Boolean(item.isConsumable);
+      selectedDuration = '1일';
+      selectedTradeMethod = 'locker';
+      const modalBody = document.getElementById('item-modal-body');
+
+      modalBody.innerHTML = `
+        <div class="flex items-start justify-between gap-3 mb-3.5">
+          <div class="flex items-center gap-3">
+            <div class="w-14 h-14 rounded-2xl ${item.iconBg} flex items-center justify-center shrink-0">
+              <i data-lucide="${item.icon}" class="w-7 h-7"></i>
+            </div>
+            <div>
+              <span class="text-[11px] font-bold px-2 py-0.5 rounded-md ${isConsumable ? 'bg-rose-50 text-rose-600' : (isAvailable ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-600')}">
+                ${isConsumable ? '반납 불필요 소모품 · 교내 무료 비치' : (isAvailable ? `실시간 잔여 ${item.available}개 (헛걸음 Zero)` : '현재 모두 대여 중')}
+              </span>
+              <h3 class="font-extrabold text-base text-slate-900 mt-1">${item.name}</h3>
+            </div>
+          </div>
+          <button onclick="closeItemModal()" class="p-1.5 rounded-full hover:bg-slate-100 text-slate-400">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <p class="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100 mb-3.5">
+          ${item.desc}
+        </p>
+
+        ${!isConsumable ? `
+          <!-- 초단기(시간~1일) 원터치 대여 기간 선택 -->
+          <div class="mb-3.5">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-xs font-bold text-slate-800">대여 기간 원터치 선택</span>
+              <span class="text-[10px] text-emerald-600 font-semibold">기본값: 1일 (설문 선호 55%)</span>
+            </div>
+            <div id="duration-chips" class="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+              ${durationOptions.map(dur => `
+                <button type="button" onclick="selectDurationChip('${dur}')" data-dur="${dur}" class="dur-chip px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap border transition ${
+                  dur === '1일' ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200'
+                }">
+                  ${dur}
+                </button>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- 거래(전달) 방식 선택: 무인보관함 vs 거점 직거래 -->
+          <div class="mb-3.5">
+            <span class="block text-xs font-bold text-slate-800 mb-1.5">전달 방식 선택 (연락처 비공개 보호)</span>
+            <div class="grid grid-cols-2 gap-2">
+              <button type="button" onclick="selectTradeMethod('locker')" id="btn-trade-locker" class="p-2.5 rounded-xl border-2 border-emerald-500 bg-emerald-50/60 text-left transition">
+                <p class="text-xs font-extrabold text-emerald-900">🔐 거점 무인보관함</p>
+                <p class="text-[10px] text-emerald-700 mt-0.5">대면 부담 없는 QR 픽업</p>
+              </button>
+              <button type="button" onclick="selectTradeMethod('direct')" id="btn-trade-direct" class="p-2.5 rounded-xl border border-slate-200 bg-white text-left transition">
+                <p class="text-xs font-extrabold text-slate-800">🤝 거점 익명 직거래</p>
+                <p class="text-[10px] text-slate-500 mt-0.5">인앱 채팅으로 즉시 전달</p>
+              </button>
+            </div>
+          </div>
+        ` : ''}
+
+        <div class="space-y-2 text-xs mb-4">
+          <div class="flex items-center justify-between py-1.5 border-b border-slate-100">
+            <span class="text-slate-400 flex items-center gap-1.5"><i data-lucide="map-pin" class="w-3.5 h-3.5 text-blue-500"></i>부경대 잇다존 거점</span>
+            <span class="font-bold text-slate-800 text-right">${item.detailLoc}</span>
+          </div>
+          <div class="flex items-center justify-between py-1.5 border-b border-slate-100">
+            <span class="text-slate-400 flex items-center gap-1.5"><i data-lucide="user-check" class="w-3.5 h-3.5 text-emerald-500"></i>제공 주체</span>
+            <span class="font-semibold text-slate-700">${item.ownerInfo}</span>
+          </div>
+        </div>
+
+        ${isConsumable ? `
+          <button onclick="closeItemModal(); switchTab('request');" class="w-full py-3.5 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-sm shadow-md transition">
+            교내 상비약·여성용품 비치 지도 자세히 보기
+          </button>
+        ` : (isAvailable ? `
+          <button onclick="confirmRent(${item.id})" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-blue-600 text-white font-bold text-sm shadow-lg shadow-emerald-500/20 active:scale-[0.99] transition">
+            1분 컷 대여 확정하기
+          </button>
+        ` : `
+          <button onclick="closeItemModal(); showToast('반납 알림 신청이 완료되었습니다! 입고 시 푸시로 알려드릴게요.')" class="w-full py-3.5 rounded-2xl bg-slate-800 text-white font-bold text-sm">
+            재고 입고 시 푸시 알림 받기
+          </button>
+        `)}
+      `;
+
+      document.getElementById('item-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function selectDurationChip(dur) {
+      selectedDuration = dur;
+      document.querySelectorAll('.dur-chip').forEach(btn => {
+        const active = btn.dataset.dur === dur;
+        btn.className = `dur-chip px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap border transition ${
+          active ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200'
+        }`;
+      });
+    }
+
+    function selectTradeMethod(method) {
+      selectedTradeMethod = method;
+      const lockerBtn = document.getElementById('btn-trade-locker');
+      const directBtn = document.getElementById('btn-trade-direct');
+      if (method === 'locker') {
+        lockerBtn.className = 'p-2.5 rounded-xl border-2 border-emerald-500 bg-emerald-50/60 text-left transition';
+        directBtn.className = 'p-2.5 rounded-xl border border-slate-200 bg-white text-left transition';
+      } else {
+        directBtn.className = 'p-2.5 rounded-xl border-2 border-blue-500 bg-blue-50/60 text-left transition';
+        lockerBtn.className = 'p-2.5 rounded-xl border border-slate-200 bg-white text-left transition';
+      }
+    }
+
+    function closeItemModal() {
+      document.getElementById('item-modal').classList.add('hidden');
+    }
+
+    function confirmRent(itemId) {
+      const item = rentalItems.find(i => i.id === itemId);
+      if (!item || item.available <= 0) return;
+
+      item.available -= 1;
+
+      const durationSecondsMap = {
+        '2시간': 7200,
+        '4시간': 14400,
+        '6시간': 21600,
+        '12시간': 43200,
+        '1일': 86400,
+        '2일': 172800,
+        '3일': 259200
+      };
+
+      const randomSlot = `${['A', 'B', 'C'][Math.floor(Math.random() * 3)]}-${Math.floor(Math.random() * 8) + 1}`;
+      const isDirect = selectedTradeMethod === 'direct';
+
+      activeRentals.unshift({
+        id: Date.now(),
+        itemId: item.id,
+        name: item.name,
+        location: isDirect ? `${item.location} 거점 익명 직거래` : `${item.location} 무인보관함 ${randomSlot}`,
+        rentedAt: `방금 전 (${selectedDuration} 대여)`,
+        remainingSeconds: durationSecondsMap[selectedDuration] || 86400,
+        extended: false,
+        lockerCode: isDirect ? '직거래' : randomSlot
+      });
+
+      closeItemModal();
+      renderItems();
+      renderActiveRentals();
+      updateHomeBanner();
+
+      if (isDirect) {
+        showToast('거점 직거래 예약 완료! 연락처 노출 없는 익명 채팅방으로 이동합니다.');
+        switchTab('rentals');
+      } else {
+        showToast(`무인보관함 [${randomSlot}] 예약 완료! (${selectedDuration}) QR이 발급되었습니다.`);
+        switchTab('qr');
+      }
+    }
+
+    function respondToSos() {
+      switchTab('rentals');
+      const chatBox = document.getElementById('chat-messages');
+      chatBox.innerHTML += `
+        <div class="flex flex-col items-end">
+          <span class="text-[10px] text-slate-400 mb-0.5">나 (익명 #108) · 방금 전</span>
+          <div class="bg-blue-600 text-white px-3 py-2 rounded-2xl rounded-tr-xs shadow-2xs max-w-[82%]">
+            저 지금 중앙도서관 정문 도서반납기 근처인데 C타입 충전기 2시간 빌려드릴 수 있어요!
+          </div>
+        </div>
+      `;
+      chatBox.scrollTop = chatBox.scrollHeight;
+      showToast('SOS 요청 학우와 익명 인앱 채팅이 연결되었습니다!');
+    }
+
+    function sendChatMessage(e) {
+      e.preventDefault();
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const chatBox = document.getElementById('chat-messages');
+      chatBox.innerHTML += `
+        <div class="flex flex-col items-end">
+          <span class="text-[10px] text-slate-400 mb-0.5">나 (익명 #108) · 방금 전</span>
+          <div class="bg-emerald-500 text-white px-3 py-2 rounded-2xl rounded-tr-xs shadow-2xs max-w-[82%]">
+            ${text}
+          </div>
+        </div>
+      `;
+      input.value = '';
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // ==================== ITEM DETAIL & INSTANT RENTAL MODAL ====================
+    function openItemModal(itemId) {
+      const item = rentalItems.find(i => i.id === itemId);
+      if (!item) return;
+
+      const isAvailable = item.available > 0;
+      const modalBody = document.getElementById('item-modal-body');
+
+      modalBody.innerHTML = `
+        <div class="flex items-start justify-between gap-3 mb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-14 h-14 rounded-2xl ${item.iconBg} flex items-center justify-center shrink-0">
+              <i data-lucide="${item.icon}" class="w-7 h-7"></i>
+            </div>
+            <div>
+              <span class="text-[11px] font-bold px-2 py-0.5 rounded-md ${isAvailable ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-600'}">
+                ${isAvailable ? `실시간 대여 가능 (${item.available}개 남음)` : '현재 모두 대여 중'}
+              </span>
+              <h3 class="font-extrabold text-base text-slate-900 mt-1">${item.name}</h3>
+            </div>
+          </div>
+          <button onclick="closeItemModal()" class="p-1.5 rounded-full hover:bg-slate-100 text-slate-400">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <p class="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100 mb-4">
+          ${item.desc}
+        </p>
+
+        <div class="space-y-2.5 text-xs mb-4">
+          <div class="flex items-center justify-between py-2 border-b border-slate-100">
+            <span class="text-slate-400 flex items-center gap-1.5"><i data-lucide="map-pin" class="w-3.5 h-3.5 text-blue-500"></i>수령 및 반납 위치</span>
+            <span class="font-bold text-slate-800 text-right">${item.detailLoc}</span>
+          </div>
+          <div class="flex items-center justify-between py-2 border-b border-slate-100">
+            <span class="text-slate-400 flex items-center gap-1.5"><i data-lucide="clock" class="w-3.5 h-3.5 text-amber-500"></i>기본 대여 기간</span>
+            <span class="font-bold text-slate-800">${item.duration}</span>
+          </div>
+          <div class="flex items-center justify-between py-2 border-b border-slate-100">
+            <span class="text-slate-400 flex items-center gap-1.5"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-500"></i>청결·파손 점검</span>
+            <span class="font-semibold text-emerald-600">${item.lastSanitized}</span>
+          </div>
+          <div class="flex items-center justify-between py-2">
+            <span class="text-slate-400 flex items-center gap-1.5"><i data-lucide="credit-card" class="w-3.5 h-3.5 text-slate-500"></i>대여료 / 보증금</span>
+            <span class="font-bold text-slate-800">무료 (학생증 QR 인증)</span>
+          </div>
+        </div>
+
+        <label class="flex items-start gap-2 p-3 rounded-xl bg-amber-50/70 border border-amber-200/70 text-[11px] text-amber-900 mb-4 cursor-pointer">
+          <input id="agree-terms" type="checkbox" checked class="mt-0.5 accent-emerald-600 rounded">
+          <span>기한 내 반납 및 반납 시 보관함 상태 인증샷 촬영에 동의합니다. (미반납 시 7일간 대여 제한)</span>
+        </label>
+
+        ${isAvailable ? `
+          <button onclick="confirmRent(${item.id})" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-blue-600 text-white font-bold text-sm shadow-lg shadow-emerald-500/20 active:scale-[0.99] transition">
+            지금 바로 대여 예약하고 QR 받기
+          </button>
+        ` : `
+          <button onclick="closeItemModal(); showToast('반납 알림 신청이 완료되었습니다! 입고 시 푸시로 알려드릴게요.')" class="w-full py-3.5 rounded-2xl bg-slate-800 text-white font-bold text-sm">
+            재고 입고 시 푸시 알림 받기
+          </button>
+        `}
+      `;
+
+      document.getElementById('item-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeItemModal() {
+      document.getElementById('item-modal').classList.add('hidden');
+    }
+
+    function confirmRent(itemId) {
+      const agreed = document.getElementById('agree-terms').checked;
+      if (!agreed) {
+        showToast('대여 및 반납 인증 약관에 동의해주세요.');
+        return;
+      }
+
+      const item = rentalItems.find(i => i.id === itemId);
+      if (!item || item.available <= 0) return;
+
+      item.available -= 1;
+
+      const randomSlot = `${['A', 'B', 'C'][Math.floor(Math.random() * 3)]}-${Math.floor(Math.random() * 8) + 1}`;
+      activeRentals.unshift({
+        id: Date.now(),
+        itemId: item.id,
+        name: item.name,
+        location: `${item.location} 스마트보관함 ${randomSlot}`,
+        rentedAt: '방금 전',
+        remainingSeconds: 21600, // 6 hours
+        extended: false,
+        lockerCode: randomSlot
+      });
+
+      closeItemModal();
+      renderItems();
+      renderActiveRentals();
+      updateHomeBanner();
+      showToast(`대여 예약 완료! 보관함 [${randomSlot}] QR이 발급되었습니다.`);
+      switchTab('qr');
+    }
+
+    // ==================== MY RENTALS & RETURN FLOW ====================
+    function renderActiveRentals() {
+      const container = document.getElementById('active-rentals-container');
+      const badge = document.getElementById('nav-rental-badge');
+
+      if (activeRentals.length === 0) {
+        badge.classList.add('hidden');
+        container.innerHTML = `
+          <div class="bg-white rounded-2xl p-8 text-center border border-slate-200/80">
+            <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-2.5">
+              <i data-lucide="package-open" class="w-6 h-6"></i>
+            </div>
+            <p class="text-sm font-bold text-slate-700">현재 대여 중인 물품이 없습니다</p>
+            <p class="text-xs text-slate-400 mt-1">충전기나 우산이 필요할 때 언제든 빌려보세요!</p>
+            <button onclick="switchTab('home')" class="mt-4 px-4 py-2 rounded-xl bg-emerald-500 text-white text-xs font-bold">
+              대여 물품 둘러보기
+            </button>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      badge.classList.remove('hidden');
+      badge.textContent = activeRentals.length;
+
+      container.innerHTML = activeRentals.map(rental => `
+        <div class="bg-white rounded-2xl p-4 border-2 border-emerald-500/30 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-bold">
+              대여 중 · 보관함 ${rental.lockerCode}
+            </span>
+            <span class="font-mono text-xs font-extrabold text-rose-500" data-rental-timer="${rental.id}">
+              ${formatSeconds(rental.remainingSeconds)} 남음
+            </span>
+          </div>
+          <div>
+            <h4 class="font-extrabold text-base text-slate-900">${rental.name}</h4>
+            <p class="text-xs text-slate-500 mt-0.5 flex items-center gap-1">
+              <i data-lucide="map-pin" class="w-3.5 h-3.5 text-blue-500"></i>
+              반납 위치: ${rental.location}
+            </p>
+          </div>
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <button onclick="extendRentalById(${rental.id})" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
+              ${rental.extended ? '연장 완료됨' : '대여 시간 연장 (+2h)'}
+            </button>
+            <button onclick="openReturnModal(${rental.id})" class="py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-xs transition">
+              상태 인증 후 반납
+            </button>
+          </div>
+        </div>
+      `).join('');
+
+      lucide.createIcons();
+    }
+
+    function renderPastRentals() {
+      const container = document.getElementById('past-rentals-container');
+      container.innerHTML = pastRentals.map(item => `
+        <div class="bg-white rounded-2xl p-3.5 border border-slate-100 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-bold text-slate-800">${item.name}</p>
+            <p class="text-[11px] text-slate-400 mt-0.5">${item.location} · ${item.date}</p>
+          </div>
+          <span class="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg">${item.status}</span>
+        </div>
+      `).join('');
+    }
+
+    function extendRentalById(id) {
+      const rental = activeRentals.find(r => r.id === id);
+      if (!rental) return;
+      if (rental.extended) {
+        showToast('이미 1회 연장이 완료된 물품입니다.');
+        return;
+      }
+      rental.remainingSeconds += 7200;
+      rental.extended = true;
+      renderActiveRentals();
+      updateHomeBanner();
+      showToast('대여 시간이 2시간 연장되었습니다! ⏰');
+    }
+
+    function extendActiveRental() {
+      if (activeRentals.length > 0) {
+        extendRentalById(activeRentals[0].id);
+      }
+    }
+
+    function openReturnModal(rentalId) {
+      returningRentalId = rentalId;
+      photoCaptured = false;
+      document.getElementById('photo-placeholder').classList.remove('hidden');
+      document.getElementById('photo-captured').classList.add('hidden');
+      document.getElementById('return-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeReturnModal() {
+      document.getElementById('return-modal').classList.add('hidden');
+    }
+
+    function simulatePhotoCapture() {
+      photoCaptured = true;
+      document.getElementById('photo-placeholder').classList.add('hidden');
+      document.getElementById('photo-captured').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function confirmReturn() {
+      if (!photoCaptured) {
+        showToast('먼저 반납 상태 인증샷 영역을 터치해 촬영해주세요 📸');
+        return;
+      }
+      const idx = activeRentals.findIndex(r => r.id === returningRentalId);
+      if (idx === -1) return;
+
+      const [finished] = activeRentals.splice(idx, 1);
+      const originalItem = rentalItems.find(i => i.id === finished.itemId);
+      if (originalItem) {
+        originalItem.available = Math.min(originalItem.total, originalItem.available + 1);
+      }
+
+      pastRentals.unshift({
+        id: Date.now(),
+        name: finished.name,
+        location: finished.location,
+        date: '오늘 반납',
+        status: '인증샷 반납완료'
+      });
+
+      closeReturnModal();
+      renderItems();
+      renderActiveRentals();
+      renderPastRentals();
+      updateHomeBanner();
+      showToast('반납 및 상태 인증이 완료되었습니다! 매너점수 +1점 🎉');
+    }
+
+    function updateHomeBanner() {
+      const banner = document.getElementById('home-active-banner');
+      if (activeRentals.length === 0) {
+        banner.classList.add('hidden');
+        return;
+      }
+      banner.classList.remove('hidden');
+      const top = activeRentals[0];
+      document.getElementById('banner-item-name').textContent = top.name;
+      document.getElementById('banner-item-loc').innerHTML = `
+        <i data-lucide="map-pin" class="w-3.5 h-3.5 text-emerald-400"></i>
+        반납: ${top.location}
+      `;
+      document.getElementById('banner-timer').textContent = `${formatSeconds(top.remainingSeconds)} 남음`;
+      lucide.createIcons();
+    }
+
+    // ==================== REQUEST NEW ITEM & UPVOTE ====================
+    function renderRequests() {
+      const container = document.getElementById('requests-list');
+      container.innerHTML = studentRequests.map(req => {
+        const progress = Math.min(100, Math.round((req.votes / 25) * 100));
+        return `
+          <div class="bg-white rounded-2xl p-3.5 border ${req.isSos ? 'border-amber-300 bg-amber-50/20' : 'border-slate-200/80'} shadow-xs">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-50 text-blue-600">${req.location}</span>
+                  ${req.isSos ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-100 text-amber-800">🚨 긴급 SOS</span>' : ''}
+                </div>
+                <h4 class="text-sm font-bold text-slate-900 mt-1">${req.name}</h4>
+                <p class="text-xs text-slate-500 mt-0.5">${req.reason}</p>
+              </div>
+              ${req.isSos ? `
+                <button onclick="respondToSos()" class="shrink-0 px-3 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold">
+                  채팅응답
+                </button>
+              ` : `
+                <button onclick="toggleVote(${req.id})" class="shrink-0 flex flex-col items-center justify-center px-3 py-2 rounded-xl border transition ${
+                  req.voted 
+                    ? 'bg-emerald-500 border-emerald-500 text-white' 
+                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-emerald-50'
+                }">
+                  <i data-lucide="thumbs-up" class="w-3.5 h-3.5"></i>
+                  <span class="text-xs font-extrabold mt-0.5">${req.votes}</span>
+                </button>
+              `}
+            </div>
+            ${!req.isSos ? `
+              <div class="mt-3">
+                <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-full bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full transition-all" style="width: ${progress}%"></div>
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    function toggleVote(reqId) {
+      const item = studentRequests.find(r => r.id === reqId);
+      if (!item) return;
+      item.voted = !item.voted;
+      item.votes += item.voted ? 1 : -1;
+      renderRequests();
+      if (item.voted) showToast('물품 구비 요청에 공감표를 보냈습니다 👍');
+    }
+
+    function submitNewRequest(e) {
+      e.preventDefault();
+      const name = document.getElementById('req-item-name').value.trim();
+      const location = document.getElementById('req-item-loc').value;
+      const duration = document.getElementById('req-item-duration').value;
+      const reason = document.getElementById('req-item-reason').value.trim() || `${location}에서 ${duration} 동안 빌려주실 학우분 찾습니다!`;
+
+      if (!name) return;
+
+      studentRequests.unshift({
+        id: Date.now(),
+        name: `${name} (${duration} 대여 희망)`,
+        location,
+        reason,
+        votes: 1,
+        voted: true,
+        isSos: true
+      });
+
+      document.getElementById('sos-banner-text').textContent = `"지금 ${location}인데 ${name} ${duration}만 빌려주실 분!"`;
+      document.getElementById('req-item-name').value = '';
+      document.getElementById('req-item-reason').value = '';
+      renderRequests();
+      showToast('긴급 SOS가 홈 상단 배너와 실시간 피드에 등록되었습니다!');
+    }
+
+    // ==================== TIMERS & UTILITIES ====================
+    function formatSeconds(sec) {
+      const h = String(Math.floor(sec / 3600)).padStart(2, '0');
+      const m = String(Math.floor((sec % 3600) / 60)).padStart(2, '0');
+      const s = String(sec % 60).padStart(2, '0');
+      return `${h}:${m}:${s}`;
+    }
+
+    function startTimers() {
+      setInterval(() => {
+        if (activeRentals.length > 0) {
+          activeRentals.forEach(r => {
+            if (r.remainingSeconds > 0) r.remainingSeconds--;
+          });
+          const top = activeRentals[0];
+          const bannerEl = document.getElementById('banner-timer');
+          if (bannerEl) bannerEl.textContent = `${formatSeconds(top.remainingSeconds)} 남음`;
+
+          document.querySelectorAll('[data-rental-timer]').forEach(el => {
+            const id = Number(el.dataset.rentalTimer);
+            const target = activeRentals.find(r => r.id === id);
+            if (target) el.textContent = `${formatSeconds(target.remainingSeconds)} 남음`;
+          });
+        }
+
+        if (qrSeconds > 0) {
+          qrSeconds--;
+        } else {
+          qrSeconds = 179;
+        }
+        const qm = String(Math.floor(qrSeconds / 60)).padStart(2, '0');
+        const qs = String(qrSeconds % 60).padStart(2, '0');
+        const qrEl = document.getElementById('qr-timer');
+        if (qrEl) qrEl.textContent = `${qm}:${qs}`;
+      }, 1000);
+    }
+
+    function resetQrTimer() {
+      qrSeconds = 179;
+      showToast('보안 QR 코드가 새로고침되었습니다.');
+    }
+
+    function copyPin() {
+      const tempInput = document.createElement('input');
+      tempInput.value = '4829';
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempInput);
+      showToast('보관함 PIN 번호(4829)가 복사되었습니다.');
+    }
+
+    function openCampusModal() {
+      document.getElementById('info-modal-title').textContent = '부경대학교 캠퍼스 선택';
+      document.getElementById('info-modal-content').innerHTML = `
+        <button onclick="setCampus('부경대학교 중앙도서관·나비센터·백경광장 통합')" class="w-full p-3 rounded-xl bg-emerald-50 text-emerald-800 font-bold text-left flex justify-between items-center">
+          <span>부경대학교 대연캠퍼스 통합</span>
+          <span class="text-[10px] bg-emerald-500 text-white px-2 py-0.5 rounded-full">현재 선택</span>
+        </button>
+        <button onclick="setCampus('부경대학교 용당캠퍼스 공학관')" class="w-full p-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold text-left">
+          부경대학교 용당캠퍼스
+        </button>
+      `;
+      document.getElementById('info-modal').classList.remove('hidden');
+    }
+
+    function setCampus(name) {
+      document.getElementById('selected-campus').textContent = name;
+      closeInfoModal();
+      showToast(`${name}으로 전환되었습니다.`);
+    }
+
+    function openLockerMapModal() {
+      document.getElementById('info-modal-title').textContent = "부경대 5대 '잇다존' 거점 안내";
+      document.getElementById('info-modal-content').innerHTML = `
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
+          <p class="font-bold text-slate-800">📍 중앙도서관 정문 도서반납기 근처 (선호 65%)</p>
+          <p class="text-slate-500 mt-0.5">공용 우산·충전기 무인보관함 & 학우 직거래 메인 거점</p>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
+          <p class="font-bold text-slate-800">📍 나비센터 앞문 로비 (선호 40%)</p>
+          <p class="text-slate-500 mt-0.5">고속충전기, 공학계산기 무인보관함 & 2층 보건진료소 상비약</p>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
+          <p class="font-bold text-slate-800">📍 백경광장 중앙 벤치 앞 (선호 20%)</p>
+          <p class="text-slate-500 mt-0.5">전공책, 우산 등 이동 동선 중 1분 컷 익명 직거래 존</p>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
+          <p class="font-bold text-slate-800">📍 기숙사 편의점 (GS25 부경대학사점) 옆</p>
+          <p class="text-slate-500 mt-0.5">24시간 무인보관함 (우산, 응급 필기구 세트 비치)</p>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
+          <p class="font-bold text-slate-800">📍 학생회관 1층 로비 / 2층 총학생회실</p>
+          <p class="text-slate-500 mt-0.5">공용 물품 대여 및 상비약·여성용품 무료 비치</p>
+        </div>
+      `;
+      document.getElementById('info-modal').classList.remove('hidden');
+    }
+
+    function closeInfoModal() {
+      document.getElementById('info-modal').classList.add('hidden');
+    }
+
+    let toastTimeout;
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.remove('hidden');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 2500);
+    }
+  </script>
+</body>
+</html>
+```
