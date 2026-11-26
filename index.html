@@ -1158,13 +1158,10 @@
         toast.classList.add('hidden');
       }, 2400);
     }
-  </script>
-</body>
-</html>
 
-// [itda-pknu 기존 페이지 쪽에 추가할 코드]
-// 1) 내가 채팅을 보낼 때 기존 화면 출력 코드 아래에 이 줄을 추가:
-localStorage.setItem('itda_latest_user_msg', JSON.stringify({ text: 보낸메시지변수, time: Date.now() }));
+
+
+    localStorage.setItem('itda_latest_user_msg', JSON.stringify({ text: 보낸메시지변수, time: Date.now() }));
 
 // 2) 비밀 페이지에서 보낸 답장을 감지해서 화면에 띄우는 코드:
 window.addEventListener('storage', (e) => {
@@ -1174,4 +1171,7 @@ window.addEventListener('storage', (e) => {
     // 예: addPartnerMessage(data.text);
   }
 });
+  </script>
+</body>
+</html>
 
