@@ -42,13 +42,6 @@
     .animate-slide-up {
       animation: slideUp 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-4px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .animate-fade-in {
-      animation: fadeIn 0.2s ease-out forwards;
-    }
   </style>
 </head>
 <body class="font-sans text-slate-900 antialiased flex justify-center min-h-screen">
@@ -56,36 +49,43 @@
   <!-- Mobile App Shell Container -->
   <div class="w-full max-w-[430px] bg-white min-h-screen sm:min-h-[844px] sm:my-4 sm:rounded-[36px] sm:shadow-2xl sm:border sm:border-slate-200/80 relative flex flex-col overflow-hidden">
 
-    <!-- 1. Top Header (좌측: 잇다 / 우측: 연한 민트/초록 둥근 배지 '물품 대여') -->
-    <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md px-5 pt-4 pb-3 flex items-center justify-between">
-      <button onclick="resetToCleanHome()" class="text-left focus:outline-none">
+    <!-- 1. Top Header -->
+    <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-100 px-5 pt-4 pb-3 flex items-center justify-between">
+      <button onclick="switchTab('home')" class="flex items-center gap-2 text-left focus:outline-none">
         <span class="font-extrabold text-[19px] tracking-tight text-slate-900">잇다</span>
+        <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-[11px] font-bold">
+          부경대 물품대여
+        </span>
       </button>
-      <span class="px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-xs font-bold tracking-tight">
-        물품 대여
-      </span>
+      <button
+        type="button"
+        onclick="switchTab('upload')"
+        class="px-3 py-1.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-1 active:scale-95 transition"
+      >
+        <i data-lucide="plus" class="w-3.5 h-3.5 text-emerald-400"></i>
+        물품 등록
+      </button>
     </header>
 
     <!-- Main Scrollable Content Area -->
     <main id="main-content" class="flex-1 overflow-y-auto no-scrollbar pb-24">
 
       <!-- ==================== TAB 1: HOME ==================== -->
-      <section id="tab-home" class="px-5 pt-2 pb-6 space-y-4">
+      <section id="tab-home" class="px-5 pt-4 pb-6 space-y-4">
 
-        <!-- 2. Main Title & Rounded Search Input -->
-        <div class="space-y-3.5">
-          <h1 class="text-[22px] font-extrabold tracking-tight text-slate-900">
+        <!-- Title & Search -->
+        <div class="space-y-3">
+          <h1 class="text-[20px] font-extrabold tracking-tight text-slate-900">
             어떤 물품이 필요하신가요?
           </h1>
-
           <div class="relative">
-            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2"></i>
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
             <input
               id="search-input"
               type="text"
               oninput="handleSearchInput()"
-              placeholder="찾으시는 물품을 검색해 보세요"
-              class="w-full pl-10 pr-9 py-3 bg-[#F3F4F6] rounded-xl text-[13.5px] text-slate-800 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-emerald-500/25 focus:border-emerald-500 border border-transparent transition"
+              placeholder="물품명, 세부 분류, 장소 검색..."
+              class="w-full pl-10 pr-9 py-2.5 bg-slate-100 rounded-xl text-[13.5px] text-slate-800 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 border border-transparent transition"
             />
             <button
               id="clear-search-btn"
@@ -97,88 +97,146 @@
           </div>
         </div>
 
-        <!-- 3. 4대 핵심 카테고리 카드 그리드 (2x2 배열) -->
-        <div class="pt-1">
-          <div id="category-cards-grid" class="grid grid-cols-2 gap-3">
+        <!-- Category Tabs -->
+        <div class="space-y-2">
+          <div id="category-tabs" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
             <!-- Injected by JS -->
           </div>
-
-          <!-- 하위 분류 토글 패널 (카테고리 클릭 시 펼쳐짐) -->
-          <div id="sub-category-drawer" class="hidden mt-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 animate-fade-in">
-            <div class="flex items-center justify-between mb-2">
-              <span id="sub-drawer-title" class="text-xs font-extrabold text-slate-800">세부 분류</span>
-              <button onclick="closeSubCategoryDrawer()" class="text-[11px] font-semibold text-slate-400 hover:text-slate-600">
-                닫기
-              </button>
-            </div>
-            <div id="sub-category-chips" class="flex flex-wrap gap-1.5">
-              <!-- Injected by JS -->
-            </div>
+          <!-- Sub-category Chips (선택된 카테고리에 세부 항목이 있을 때 표시) -->
+          <div id="sub-category-chips" class="hidden flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-0.5">
+            <!-- Injected by JS -->
           </div>
-
-          <!-- 안내 문구 -->
-          <p class="text-[12px] text-slate-500 mt-3">
-            카테고리를 눌러 하위 분류를 확인해 보세요.
-          </p>
         </div>
 
-        <!-- 4. 대여 물품 목록 토글 (접이식 아코디언 - 기본 접힘 상태) -->
-        <div class="pt-2">
-          <div class="rounded-2xl border border-slate-200/90 bg-white overflow-hidden shadow-2xs">
-            <!-- Toggle Header Bar -->
-            <button
-              type="button"
-              onclick="toggleItemsAccordion()"
-              class="w-full px-4 py-3.5 flex items-center justify-between bg-slate-50/70 hover:bg-slate-100/70 transition text-left"
-            >
-              <div class="flex items-center gap-2 min-w-0">
-                <span class="text-[13px] font-extrabold text-slate-900 truncate">
-                  대여 가능한 물품 목록 보기 (<span id="total-filtered-count" class="text-emerald-600">총 0개</span>)
-                </span>
-                <span id="active-filter-badge" class="shrink-0 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 text-[10.5px] font-bold">
-                  전체
-                </span>
-              </div>
-              <i id="accordion-chevron" data-lucide="chevron-down" class="w-4 h-4 text-slate-500 shrink-0 transition-transform duration-200"></i>
-            </button>
-
-            <!-- Collapsible Content -->
-            <div id="items-accordion-body" class="hidden border-t border-slate-100 p-3.5 space-y-3 bg-white">
-              <!-- 대여 장소 필터 (전체, 백경광장, 나비센터, 중앙도서관) -->
-              <div class="flex items-center justify-between gap-2">
-                <div id="location-pills" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-                  <!-- Injected by JS -->
-                </div>
-                <button onclick="resetAllFilters()" class="shrink-0 text-[11px] font-semibold text-slate-400 hover:text-slate-700">
-                  초기화
-                </button>
-              </div>
-
-              <!-- 대여 물품 리스트 -->
-              <div id="items-list" class="space-y-2.5">
-                <!-- Injected by JS -->
-              </div>
-            </div>
+        <!-- Location Filter Pills & Count -->
+        <div class="flex items-center justify-between gap-2 pt-1 border-t border-slate-100">
+          <div id="location-pills" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+            <!-- Injected by JS -->
           </div>
+          <span id="item-count-label" class="shrink-0 text-[11.5px] font-bold text-slate-400">
+            총 0개
+          </span>
+        </div>
+
+        <!-- Rental Items List -->
+        <div id="items-list" class="space-y-2.5">
+          <!-- Injected by JS -->
         </div>
 
       </section>
 
-      <!-- ==================== TAB 2: CHAT (연락처 기반 1:1 채팅) ==================== -->
+      <!-- ==================== TAB 2: UPLOAD (대여물품 업로드) ==================== -->
+      <section id="tab-upload" class="hidden px-5 pt-4 pb-8 space-y-4">
+        <div class="space-y-1">
+          <h2 class="text-[19px] font-extrabold text-slate-900">대여물품 업로드</h2>
+          <p class="text-xs text-slate-500">학우들과 나눌 물품 정보를 입력해 주세요. 이름만 공개됩니다.</p>
+        </div>
+
+        <form id="upload-form" onsubmit="handleUploadSubmit(event)" class="space-y-4">
+          <!-- 1. 등록자 이름 -->
+          <div>
+            <label class="block text-xs font-extrabold text-slate-800 mb-1.5">
+              등록자 이름 <span class="text-emerald-600">*</span>
+            </label>
+            <input
+              id="upload-owner"
+              type="text"
+              required
+              placeholder="예: 김민수"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:bg-white focus:border-emerald-500 transition"
+            />
+          </div>
+
+          <!-- 2. 카테고리 선택 -->
+          <div>
+            <label class="block text-xs font-extrabold text-slate-800 mb-1.5">
+              카테고리 선택 <span class="text-emerald-600">*</span>
+            </label>
+            <div id="upload-cat-grid" class="grid grid-cols-2 gap-2">
+              <!-- Injected by JS -->
+            </div>
+          </div>
+
+          <!-- 3. 세부 물품명 -->
+          <div>
+            <label class="block text-xs font-extrabold text-slate-800 mb-1.5">
+              세부 물품명 <span class="text-emerald-600">*</span>
+            </label>
+            <input
+              id="upload-name"
+              type="text"
+              required
+              placeholder="예: C타입 충전기, 공학용 계산기, 선형대수학 전공책 등"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:bg-white focus:border-emerald-500 transition"
+            />
+          </div>
+
+          <!-- 4. 대여 장소 -->
+          <div>
+            <label class="block text-xs font-extrabold text-slate-800 mb-1.5">
+              대여 장소 <span class="text-emerald-600">*</span>
+            </label>
+            <div id="upload-loc-grid" class="grid grid-cols-3 gap-2">
+              <!-- Injected by JS -->
+            </div>
+          </div>
+
+          <!-- 5. 대여 가능 수량 -->
+          <div>
+            <label class="block text-xs font-extrabold text-slate-800 mb-1.5">
+              대여 가능 수량
+            </label>
+            <div class="flex items-center gap-2">
+              <input
+                id="upload-qty"
+                type="number"
+                min="1"
+                max="20"
+                value="1"
+                required
+                class="w-28 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-bold text-slate-900 focus:outline-none focus:bg-white focus:border-emerald-500 transition"
+              />
+              <span class="text-xs font-semibold text-slate-500">개</span>
+            </div>
+          </div>
+
+          <!-- 6. 간단한 설명 / 상태 메모 -->
+          <div>
+            <label class="block text-xs font-extrabold text-slate-800 mb-1.5">
+              간단한 설명 / 상태 메모
+            </label>
+            <textarea
+              id="upload-desc"
+              rows="3"
+              placeholder="물품 상태나 전달 가능한 시간대를 간단히 적어주세요."
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:bg-white focus:border-emerald-500 transition resize-none"
+            ></textarea>
+          </div>
+
+          <button
+            type="submit"
+            class="w-full py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm shadow-sm active:scale-[0.99] transition"
+          >
+            물품 등록 완료하기
+          </button>
+        </form>
+      </section>
+
+      <!-- ==================== TAB 3: CHAT (이름 기반 1:1 인앱 채팅) ==================== -->
       <section id="tab-chat" class="hidden flex flex-col h-full bg-slate-50">
         <!-- Chat Room Selector -->
         <div class="bg-white border-b border-slate-200/80 px-4 py-3">
           <div class="flex items-center justify-between mb-2">
-            <h2 class="text-xs font-bold text-slate-500">대여 상대방 목록 (연락처 연동)</h2>
-            <span class="text-[11px] font-semibold text-emerald-600">부경대 학우 직접 연결</span>
+            <h2 class="text-xs font-bold text-slate-500">대여 채팅 목록</h2>
+            <span class="text-[11px] font-semibold text-emerald-600">인앱 1:1 대화</span>
           </div>
           <div id="chat-room-list" class="flex gap-2 overflow-x-auto no-scrollbar pb-0.5">
             <!-- Injected by JS -->
           </div>
         </div>
 
-        <!-- Active Contact Info Banner -->
-        <div id="active-contact-header" class="bg-emerald-50/70 border-b border-emerald-100 px-4 py-3">
+        <!-- Active Partner Info Banner (이름 & 물품 정보만 표시) -->
+        <div id="active-chat-header" class="bg-emerald-50/70 border-b border-emerald-100 px-4 py-3">
           <!-- Injected by JS -->
         </div>
 
@@ -187,18 +245,17 @@
           <!-- Injected by JS -->
         </div>
 
-        <!-- Quick Contact Share & Message Input -->
+        <!-- Quick Replies & Message Input -->
         <div class="bg-white border-t border-slate-200/80 p-3 space-y-2">
           <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-            <button type="button" onclick="shareMyContact()" class="shrink-0 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-bold flex items-center gap-1 active:scale-95 transition">
-              <i data-lucide="contact" class="w-3 h-3"></i>
-              내 번호 전송
-            </button>
-            <button type="button" onclick="insertQuickText('지금 바로 대여 장소로 나갈 수 있어요!')" class="shrink-0 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-[11px] font-medium">
+            <button type="button" onclick="insertQuickText('지금 바로 대여 장소로 나갈 수 있어요!')" class="shrink-0 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-[11px] font-medium hover:bg-slate-200/70 transition">
               지금 나갈 수 있어요
             </button>
-            <button type="button" onclick="insertQuickText('반납 시간 맞춰서 같은 장소로 갈게요.')" class="shrink-0 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-[11px] font-medium">
+            <button type="button" onclick="insertQuickText('반납 시간 맞춰서 같은 장소로 갈게요.')" class="shrink-0 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-[11px] font-medium hover:bg-slate-200/70 transition">
               반납 시간 맞출게요
+            </button>
+            <button type="button" onclick="insertQuickText('감사합니다! 잘 쓰고 깨끗하게 반납할게요.')" class="shrink-0 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-[11px] font-medium hover:bg-slate-200/70 transition">
+              잘 쓰고 반납할게요
             </button>
           </div>
 
@@ -218,11 +275,15 @@
 
     </main>
 
-    <!-- 5. Bottom Navigation Bar (홈 / 채팅 2개 탭 심플 구성) -->
-    <nav class="sticky bottom-0 z-30 bg-white/95 backdrop-blur-md border-t border-slate-100 px-6 py-2.5 grid grid-cols-2 items-center">
+    <!-- 5. Bottom Navigation Bar (홈 / 물품등록 / 채팅) -->
+    <nav class="sticky bottom-0 z-30 bg-white/95 backdrop-blur-md border-t border-slate-100 px-4 py-2.5 grid grid-cols-3 items-center">
       <button onclick="switchTab('home')" data-tab="home" class="nav-btn flex flex-col items-center justify-center py-0.5 text-slate-900 font-extrabold">
         <i data-lucide="home" class="w-5 h-5"></i>
         <span class="text-[11px] mt-1">홈</span>
+      </button>
+      <button onclick="switchTab('upload')" data-tab="upload" class="nav-btn flex flex-col items-center justify-center py-0.5 text-slate-400 hover:text-slate-600">
+        <i data-lucide="plus-circle" class="w-5 h-5"></i>
+        <span class="text-[11px] mt-1">물품등록</span>
       </button>
       <button onclick="switchTab('chat')" data-tab="chat" class="nav-btn relative flex flex-col items-center justify-center py-0.5 text-slate-400 hover:text-slate-600">
         <i data-lucide="message-circle" class="w-5 h-5"></i>
@@ -250,163 +311,239 @@
     // ==================== DATA CONFIGURATION ====================
     // 대여 장소 (백경광장, 나비센터, 중앙도서관)
     const locations = ['전체', '백경광장', '나비센터', '중앙도서관'];
+    const uploadLocations = ['백경광장', '나비센터', '중앙도서관'];
 
     // 대여 기간 (1일, 2일, 3일만 제공)
     const rentalDurations = ['1일', '2일', '3일'];
 
-    // 4대 핵심 카테고리 구조 (시안 30832.jpg 기반)
-    const mainCategories = [
+    // 카테고리 및 세부 분류 구조
+    const categoryGroups = [
       {
-        id: 'study',
-        title: '학습용품',
-        subtitle: '계산기 · 전공책 · 필기구',
-        icon: 'calculator',
-        subItems: ['전체', '공학계산기', '전공책', '필기구']
+        id: '전체',
+        label: '전체',
+        subItems: []
       },
       {
-        id: 'electronics',
-        title: '전자기기',
-        subtitle: '충전기 · 보조배터리',
+        id: '전자기기',
+        label: '전자기기',
         icon: 'smartphone',
-        subItems: ['전체', '충전기(c타입)','충전기(8핀)', '보조배터리']
+        subItems: ['전체', 'C타입', '8핀', '보조배터리']
       },
       {
-        id: 'living',
-        title: '생활용품',
-        subtitle: '우산',
+        id: '학습용품',
+        label: '학습용품',
+        icon: 'calculator',
+        subItems: ['전체', '공학용 계산기', '전공책', '필기구']
+      },
+      {
+        id: '건강/위생용품',
+        label: '건강/위생용품',
+        icon: 'heart-pulse',
+        subItems: ['전체', '밴드', '파스', '진통제', '소화제', '여성용품']
+      },
+      {
+        id: '생활용품',
+        label: '생활용품',
         icon: 'umbrella',
         subItems: ['전체', '우산']
-      },
-      {
-        id: 'health',
-        title: '건강·위생용품',
-        subtitle: '상비약 · 여성용품',
-        icon: 'heart-pulse',
-        subItems: ['전체','밴드','파스','진통제','소화제', '손톱깎이', '여성용품']
       }
     ];
 
-    // 물품 데이터 (부경대 거점 & 등록자 연락처 포함)
+    // 물품 데이터 (학과 및 연락처 제외, 이름만 공개)
     let rentalItems = [
+      // [전자기기] C타입, 8핀, 보조배터리
       {
         id: 1,
-        name: '카시오 공학용 계산기 (fx-570EX)',
-        mainCat: 'study',
-        subCat: '공학계산기',
-        location: '백경광장',
-        available: true,
-        ownerName: '박지훈',
-        ownerPhone: '010-0000-0000',
-        icon: 'calculator',
-        desc: '시험이나 과제할 때 급하게 필요하신 분 백경광장 벤치 앞에서 바로 빌려드립니다.'
-      },
-      {
-        id: 2,
-        name: '전공책 - 자료구조와 알고리즘',
-        mainCat: 'study',
-        subCat: '전공책',
-        location: '중앙도서관',
-        available: true,
-        ownerName: '최유진',
-        ownerPhone: '010-0000-0000',
-        icon: 'book-open',
-        desc: '필기 거의 없는 깨끗한 전공서적입니다. 중앙도서관 1층 입구에서 전달 가능해요.'
-      },
-      {
-        id: 3,
-        name: '시험용 필기구 세트 (컴싸·수정테이프·샤프)',
-        mainCat: 'study',
-        subCat: '필기구',
+        name: 'C타입 고속충전기 & 케이블',
+        category: '전자기기',
+        subCategory: 'C타입',
         location: '나비센터',
-        available: true,
-        ownerName: '정현우',
-        ownerPhone: '010-0000-0000',
-        icon: 'pen-tool',
-        desc: '필통을 두고 왔을 때 바로 쓸 수 있도록 여분 필기구 세트로 챙겨두었습니다.'
-      },
-      {
-        id: 4,
-        name: 'C타입 65W 고속충전기 어댑터',
-        mainCat: 'electronics',
-        subCat: '충전기',
-        location: '나비센터',
-        available: true,
+        quantity: 2,
         ownerName: '이서연',
-        ownerPhone: '010-0000-0000',
         icon: 'plug-zap',
         desc: '노트북 및 스마트폰 고속충전 지원합니다. 나비센터 1층 로비에서 바로 대여 가능합니다.'
       },
       {
-        id: 5,
-        name: '8핀 / C타입 겸용 고속 충전 케이블',
-        mainCat: 'electronics',
-        subCat: '케이블',
+        id: 2,
+        name: '8핀 아이폰 충전 케이블',
+        category: '전자기기',
+        subCategory: '8핀',
         location: '중앙도서관',
-        available: true,
+        quantity: 1,
         ownerName: '강도윤',
-        ownerPhone: '010-0000-0000',
         icon: 'cable',
-        desc: '아이폰과 갤럭시 모두 충전 가능한 2m 길이 고속 케이블입니다.'
+        desc: '아이폰용 2m 고속 충전 케이블입니다. 중앙도서관 1층 입구에서 전달 가능해요.'
+      },
+      {
+        id: 3,
+        name: '10,000mAh 일체형 보조배터리',
+        category: '전자기기',
+        subCategory: '보조배터리',
+        location: '백경광장',
+        quantity: 1,
+        ownerName: '송민재',
+        icon: 'battery-charging',
+        desc: '완충 상태로 보관 중입니다. C타입/8핀 모두 연결 가능합니다.'
+      },
+
+      // [학습용품] 공학용 계산기, 전공책(세분화), 필기구(세분화)
+      {
+        id: 4,
+        name: '카시오 공학용 계산기 (fx-570EX)',
+        category: '학습용품',
+        subCategory: '공학용 계산기',
+        location: '백경광장',
+        quantity: 1,
+        ownerName: '박지훈',
+        icon: 'calculator',
+        desc: '시험이나 과제할 때 급하게 필요하신 분 백경광장 벤치 앞에서 바로 빌려드립니다.'
+      },
+      {
+        id: 5,
+        name: '전공책 - 미적분학 (Stewart 9판)',
+        category: '학습용품',
+        subCategory: '전공책',
+        location: '중앙도서관',
+        quantity: 1,
+        ownerName: '최유진',
+        icon: 'book-open',
+        desc: '필기 거의 없는 깨끗한 미적분학 원서/번역본입니다. 도서관 앞에서 전달해 드려요.'
       },
       {
         id: 6,
-        name: '10,000mAh 일체형 보조배터리',
-        mainCat: 'electronics',
-        subCat: '보조배터리',
-        location: '백경광장',
-        available: true,
-        ownerName: '송민재',
-        ownerPhone: '010-0000-0000',
-        icon: 'battery-charging',
-        desc: '완충 상태로 보관 중입니다. 백경광장 근처에서 빠르게 전달해 드릴 수 있어요.'
+        name: '전공책 - 선형대수학 입문',
+        category: '학습용품',
+        subCategory: '전공책',
+        location: '나비센터',
+        quantity: 1,
+        ownerName: '정현우',
+        icon: 'book-open',
+        desc: '과제 참고용으로 단기 대여 가능합니다. 상태 아주 양호합니다.'
       },
       {
         id: 7,
-        name: '장우산 (3단 방풍 우산)',
-        mainCat: 'living',
-        subCat: '우산',
+        name: '전공책 - 일반물리학 (Halliday)',
+        category: '학습용품',
+        subCategory: '전공책',
         location: '중앙도서관',
-        available: true,
+        quantity: 1,
+        ownerName: '오하은',
+        icon: 'book-open',
+        desc: '일반물리학 1, 2 합본 교재입니다. 필요한 기간만큼 편하게 빌려 쓰세요.'
+      },
+      {
+        id: 8,
+        name: '필기구 - 볼펜 & 네임펜 세트',
+        category: '학습용품',
+        subCategory: '필기구',
+        location: '나비센터',
+        quantity: 3,
         ownerName: '김민수',
-        ownerPhone: '010-0000-0000',
-        icon: 'umbrella',
-        desc: '갑자기 비 올 때 중앙도서관 1층 정문 앞에서 바로 빌려드립니다.'
+        icon: 'pen-tool',
+        desc: '검정·파랑·빨강 볼펜과 유성 네임펜이 함께 들어있는 필기구 파우치입니다.'
       },
       {
         id: 9,
-        name: '상비약 파우치 (타이레놀·소화제·연고·밴드)',
-        mainCat: 'health',
-        subCat: '상비약',
-        location: '백경광장',
-        available: true,
-        ownerName: '한소희',
-        ownerPhone: '010-0000-0000',
-        icon: 'heart-pulse',
-        desc: '두통약, 소화제, 상처 연고와 밴드가 들어있습니다. 필요한 만큼 사용 후 파우치만 반납해주세요.'
+        name: '필기구 - 샤프 & 형광펜 세트',
+        category: '학습용품',
+        subCategory: '필기구',
+        location: '중앙도서관',
+        quantity: 2,
+        ownerName: '윤지아',
+        icon: 'pen-tool',
+        desc: '0.5mm 샤프, 샤프심, 파스텔 형광펜 3색 세트입니다.'
       },
       {
         id: 10,
-        name: '비상 여성용품 & 위생 파우치',
-        mainCat: 'health',
-        subCat: '여성용품',
+        name: '필기구 - 15cm 자 & 수정테이프',
+        category: '학습용품',
+        subCategory: '필기구',
+        location: '백경광장',
+        quantity: 2,
+        ownerName: '한소희',
+        icon: 'ruler',
+        desc: '시험 직전 급하게 필요한 자와 수정테이프입니다.'
+      },
+
+      // [건강/위생용품] 밴드, 파스, 진통제, 소화제, 여성용품
+      {
+        id: 11,
+        name: '방수 밴드 & 일회용 반창고',
+        category: '건강/위생용품',
+        subCategory: '밴드',
+        location: '백경광장',
+        quantity: 5,
+        ownerName: '한소희',
+        icon: 'heart-pulse',
+        desc: '표준형 및 대형 방수 밴드입니다. 필요하신 만큼 넉넉히 챙겨드립니다.'
+      },
+      {
+        id: 12,
+        name: '쿨파스 (붙이는 파스 2매입)',
+        category: '건강/위생용품',
+        subCategory: '파스',
         location: '나비센터',
-        available: true,
+        quantity: 3,
+        ownerName: '박지훈',
+        icon: 'heart-pulse',
+        desc: '발목이나 손목 삐었을 때 바로 붙일 수 있는 쿨파스입니다.'
+      },
+      {
+        id: 13,
+        name: '진통제 (타이레놀 500mg)',
+        category: '건강/위생용품',
+        subCategory: '진통제',
+        location: '중앙도서관',
+        quantity: 4,
+        ownerName: '이서연',
+        icon: 'pill',
+        desc: '갑작스러운 두통이나 치통 있을 때 바로 드릴 수 있습니다.'
+      },
+      {
+        id: 14,
+        name: '소화제 (알약 소화제)',
+        category: '건강/위생용품',
+        subCategory: '소화제',
+        location: '백경광장',
+        quantity: 3,
+        ownerName: '송민재',
+        icon: 'pill',
+        desc: '점심 식사 후 체했을 때 바로 복용하실 수 있도록 여분 보관 중입니다.'
+      },
+      {
+        id: 15,
+        name: '비상 여성용품 파우치',
+        category: '건강/위생용품',
+        subCategory: '여성용품',
+        location: '나비센터',
+        quantity: 4,
         ownerName: '윤지아',
-        ownerPhone: '010-0000-0000',
         icon: 'shield-heart',
-        desc: '급하게 필요할 때 연락 주시면 나비센터 앞에서 바로 전해드립니다.'
+        desc: '중형·대형 위생용품이 깔끔하게 개별 포장되어 있습니다.'
+      },
+
+      // [생활용품] 우산
+      {
+        id: 16,
+        name: '장우산 (3단 방풍 우산)',
+        category: '생활용품',
+        subCategory: '우산',
+        location: '중앙도서관',
+        quantity: 2,
+        ownerName: '김민수',
+        icon: 'umbrella',
+        desc: '갑자기 비 올 때 중앙도서관 1층 정문 앞에서 바로 빌려드립니다.'
       }
     ];
 
-    // 연락처 기반 채팅방 데이터
+    // 이름 기반 인앱 채팅방 데이터 (학과 및 연락처 없음)
     let chatRooms = [
       {
         id: 1,
-        itemId: 7,
+        itemId: 16,
         itemName: '장우산 (3단 방풍 우산)',
         location: '중앙도서관',
-        ownerName: '김민수 (컴퓨터공학과)',
-        ownerPhone: '010-0000-0000',
+        ownerName: '김민수',
         messages: [
           { sender: 'other', text: '안녕하세요! 중앙도서관 1층 입구에서 장우산 대여 가능합니다 😊', time: '13:40' },
           { sender: 'me', text: '안녕하세요! 지금 중앙도서관인데 바로 대여 가능할까요?', time: '13:42' }
@@ -414,30 +551,33 @@
       },
       {
         id: 2,
-        itemId: 4,
-        itemName: 'C타입 65W 고속충전기 어댑터',
+        itemId: 1,
+        itemName: 'C타입 고속충전기 & 케이블',
         location: '나비센터',
-        ownerName: '이서연 (전자공학과)',
-        ownerPhone: '010-0000-0000',
+        ownerName: '이서연',
         messages: [
-          { sender: 'other', text: '나비센터 1층 로비에 있습니다. 급하시면 위 연락처로 전화 주셔도 돼요!', time: '12:15' }
+          { sender: 'other', text: '나비센터 1층 로비에 있습니다. 도착하시면 채팅 주세요!', time: '12:15' }
         ]
       }
     ];
 
     // ==================== STATE VARIABLES ====================
-    let selectedMainCat = null;      // null | 'study' | 'electronics' | 'living' | 'health'
-    let selectedSubCat = '전체';     // '전체' | 세부 하위 분류
-    let selectedLocation = '전체';   // '전체' | '백경광장' | '나비센터' | '중앙도서관'
-    let isAccordionOpen = false;     // 기본값: 접혀 있음 (깔끔한 홈 유지)
-    let selectedDuration = '1일';    // '1일' | '2일' | '3일'
+    let selectedCategory = '전체';
+    let selectedSubCategory = '전체';
+    let selectedLocation = '전체';
+    let selectedDuration = '1일';
     let activeChatRoomId = 1;
+
+    // Upload Form State
+    let uploadSelectedCategory = '전자기기';
+    let uploadSelectedLocation = '백경광장';
 
     // ==================== INITIALIZATION ====================
     document.addEventListener('DOMContentLoaded', () => {
-      renderMainCategoryCards();
+      renderCategoryTabs();
       renderLocationPills();
       renderItemsList();
+      renderUploadFormOptions();
       renderChatRooms();
       renderActiveChat();
       lucide.createIcons();
@@ -445,7 +585,7 @@
 
     // ==================== NAVIGATION ====================
     function switchTab(tabName) {
-      ['home', 'chat'].forEach(t => {
+      ['home', 'upload', 'chat'].forEach(t => {
         document.getElementById(`tab-${t}`).classList.add('hidden');
       });
       document.getElementById(`tab-${tabName}`).classList.remove('hidden');
@@ -461,167 +601,71 @@
       lucide.createIcons();
     }
 
-    function resetToCleanHome() {
-      switchTab('home');
-      resetAllFilters();
-      isAccordionOpen = false;
-      selectedMainCat = null;
-      selectedSubCat = '전체';
-      document.getElementById('sub-category-drawer').classList.add('hidden');
-      updateAccordionUI();
-      renderMainCategoryCards();
-      renderItemsList();
-    }
-
-    // ==================== 4 MAIN CATEGORY CARDS & SUB-CATEGORY TOGGLE ====================
-    function renderMainCategoryCards() {
-      const grid = document.getElementById('category-cards-grid');
-      grid.innerHTML = mainCategories.map(cat => {
-        const isSelected = selectedMainCat === cat.id;
+    // ==================== CATEGORY & LOCATION FILTERS ====================
+    function renderCategoryTabs() {
+      const container = document.getElementById('category-tabs');
+      container.innerHTML = categoryGroups.map(cat => {
+        const active = selectedCategory === cat.id;
         return `
           <button
             type="button"
-            onclick="handleMainCategoryClick('${cat.id}')"
-            class="relative text-left p-4 rounded-2xl border transition-all duration-150 flex flex-col justify-between min-h-[124px] active:scale-[0.98] ${
-              isSelected
-                ? 'bg-emerald-50/40 border-emerald-500 ring-2 ring-emerald-500/15 shadow-xs'
-                : 'bg-white border-slate-200/90 hover:border-slate-300'
+            onclick="selectCategory('${cat.id}')"
+            class="shrink-0 px-3.5 py-2 rounded-full text-xs font-extrabold transition ${
+              active
+                ? 'bg-slate-900 text-white shadow-2xs'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200/70'
             }"
           >
-            <div>
-              <div class="w-7 h-7 flex items-center justify-start text-slate-800 mb-2">
-                <i data-lucide="${cat.icon}" class="w-5 h-5 stroke-[1.9]"></i>
-              </div>
-              <h3 class="text-[15.5px] font-extrabold text-slate-900 tracking-tight">
-                ${cat.title}
-              </h3>
-              <p class="text-[11px] text-slate-400 mt-0.5 leading-snug">
-                ${cat.subtitle}
-              </p>
-            </div>
-
-            <!-- 우측 하단 아래 화살표 ∨ 아이콘 -->
-            <div class="flex justify-end mt-2">
-              <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform duration-200 ${isSelected ? 'rotate-180 text-emerald-600' : ''}"></i>
-            </div>
+            ${cat.label}
           </button>
         `;
       }).join('');
 
-      lucide.createIcons();
+      renderSubCategoryChips();
     }
 
-    function handleMainCategoryClick(catId) {
-      if (selectedMainCat === catId) {
-        // 같은 카드 재클릭 시 하위 분류 서랍 토글
-        const drawer = document.getElementById('sub-category-drawer');
-        const isHidden = drawer.classList.contains('hidden');
-        if (isHidden) {
-          drawer.classList.remove('hidden');
-        } else {
-          selectedMainCat = null;
-          selectedSubCat = '전체';
-          drawer.classList.add('hidden');
-        }
-      } else {
-        selectedMainCat = catId;
-        selectedSubCat = '전체';
-        renderSubCategoryDrawer();
-        // 물품 목록 토글도 자동으로 펼쳐서 필터링 결과 표시
-        isAccordionOpen = true;
-        updateAccordionUI();
-      }
+    function renderSubCategoryChips() {
+      const catObj = categoryGroups.find(c => c.id === selectedCategory);
+      const container = document.getElementById('sub-category-chips');
 
-      renderMainCategoryCards();
-      renderItemsList();
-    }
-
-    function renderSubCategoryDrawer() {
-      const catObj = mainCategories.find(c => c.id === selectedMainCat);
-      const drawer = document.getElementById('sub-category-drawer');
-      if (!catObj) {
-        drawer.classList.add('hidden');
+      if (!catObj || catObj.subItems.length === 0) {
+        container.classList.add('hidden');
+        container.innerHTML = '';
         return;
       }
 
-      document.getElementById('sub-drawer-title').textContent = `${catObj.title} 하위 분류`;
-      const chipsContainer = document.getElementById('sub-category-chips');
-
-      chipsContainer.innerHTML = catObj.subItems.map(sub => {
-        const active = selectedSubCat === sub;
+      container.classList.remove('hidden');
+      container.innerHTML = catObj.subItems.map(sub => {
+        const active = selectedSubCategory === sub;
         return `
           <button
             type="button"
             onclick="selectSubCategory('${sub}')"
-            class="px-3 py-1.5 rounded-full text-xs font-bold transition ${
+            class="shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-bold border transition ${
               active
-                ? 'bg-slate-900 text-white shadow-2xs'
-                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
+                : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
             }"
           >
             ${sub}
           </button>
         `;
       }).join('');
+    }
 
-      drawer.classList.remove('hidden');
+    function selectCategory(catId) {
+      selectedCategory = catId;
+      selectedSubCategory = '전체';
+      renderCategoryTabs();
+      renderItemsList();
     }
 
     function selectSubCategory(sub) {
-      selectedSubCat = sub;
-      isAccordionOpen = true;
-      updateAccordionUI();
-      renderSubCategoryDrawer();
+      selectedSubCategory = sub;
+      renderSubCategoryChips();
       renderItemsList();
     }
 
-    function closeSubCategoryDrawer() {
-      selectedMainCat = null;
-      selectedSubCat = '전체';
-      document.getElementById('sub-category-drawer').classList.add('hidden');
-      renderMainCategoryCards();
-      renderItemsList();
-    }
-
-    // ==================== SEARCH & ACCORDION TOGGLE ====================
-    function handleSearchInput() {
-      const val = document.getElementById('search-input').value;
-      const clearBtn = document.getElementById('clear-search-btn');
-      clearBtn.classList.toggle('hidden', val.length === 0);
-
-      // 검색어 입력 시 대여 물품 목록 토글 자동 펼침
-      if (val.trim().length > 0 && !isAccordionOpen) {
-        isAccordionOpen = true;
-        updateAccordionUI();
-      }
-      renderItemsList();
-    }
-
-    function clearSearch() {
-      document.getElementById('search-input').value = '';
-      document.getElementById('clear-search-btn').classList.add('hidden');
-      renderItemsList();
-    }
-
-    function toggleItemsAccordion() {
-      isAccordionOpen = !isAccordionOpen;
-      updateAccordionUI();
-    }
-
-    function updateAccordionUI() {
-      const body = document.getElementById('items-accordion-body');
-      const chevron = document.getElementById('accordion-chevron');
-
-      if (isAccordionOpen) {
-        body.classList.remove('hidden');
-        chevron.classList.add('rotate-180');
-      } else {
-        body.classList.add('hidden');
-        chevron.classList.remove('rotate-180');
-      }
-    }
-
-    // ==================== LOCATION PILLS & ITEMS LIST ====================
     function renderLocationPills() {
       const container = document.getElementById('location-pills');
       container.innerHTML = locations.map(loc => {
@@ -632,7 +676,7 @@
             onclick="selectLocation('${loc}')"
             class="shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${
               active
-                ? 'bg-slate-900 text-white'
+                ? 'bg-emerald-600 text-white'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200/70'
             }"
           >
@@ -648,58 +692,43 @@
       renderItemsList();
     }
 
-    function resetAllFilters() {
-      selectedMainCat = null;
-      selectedSubCat = '전체';
-      selectedLocation = '전체';
-      document.getElementById('search-input').value = '';
-      document.getElementById('clear-search-btn').classList.add('hidden');
-      document.getElementById('sub-category-drawer').classList.add('hidden');
-      renderMainCategoryCards();
-      renderLocationPills();
+    function handleSearchInput() {
+      const val = document.getElementById('search-input').value;
+      document.getElementById('clear-search-btn').classList.toggle('hidden', val.length === 0);
       renderItemsList();
     }
 
+    function clearSearch() {
+      document.getElementById('search-input').value = '';
+      document.getElementById('clear-search-btn').classList.add('hidden');
+      renderItemsList();
+    }
+
+    // ==================== ITEMS LIST RENDERING ====================
     function renderItemsList() {
       const query = document.getElementById('search-input').value.trim().toLowerCase();
 
       const filtered = rentalItems.filter(item => {
-        const matchMain = !selectedMainCat || item.mainCat === selectedMainCat;
-        const matchSub = selectedSubCat === '전체' || item.subCat === selectedSubCat;
+        const matchCat = selectedCategory === '전체' || item.category === selectedCategory;
+        const matchSub = selectedSubCategory === '전체' || item.subCategory === selectedSubCategory;
         const matchLoc = selectedLocation === '전체' || item.location === selectedLocation;
         const matchQuery =
           !query ||
           item.name.toLowerCase().includes(query) ||
-          item.subCat.toLowerCase().includes(query) ||
+          item.category.toLowerCase().includes(query) ||
+          item.subCategory.toLowerCase().includes(query) ||
           item.location.includes(query);
-        return matchMain && matchSub && matchLoc && matchQuery;
+        return matchCat && matchSub && matchLoc && matchQuery;
       });
 
-      // 토글 헤더 카운트 및 필터 배지 업데이트
-      document.getElementById('total-filtered-count').textContent = `총 ${filtered.length}개`;
-
-      const badgeEl = document.getElementById('active-filter-badge');
-      if (!selectedMainCat && selectedLocation === '전체') {
-        badgeEl.textContent = '전체';
-      } else {
-        const catObj = mainCategories.find(c => c.id === selectedMainCat);
-        const parts = [];
-        if (catObj) {
-          parts.push(selectedSubCat !== '전체' ? selectedSubCat : catObj.title);
-        }
-        if (selectedLocation !== '전체') {
-          parts.push(selectedLocation);
-        }
-        badgeEl.textContent = parts.join(' · ');
-      }
-
+      document.getElementById('item-count-label').textContent = `총 ${filtered.length}개`;
       const container = document.getElementById('items-list');
 
       if (filtered.length === 0) {
         container.innerHTML = `
-          <div class="py-7 text-center bg-slate-50 rounded-xl border border-slate-100">
+          <div class="py-10 text-center bg-slate-50 rounded-2xl border border-slate-100">
             <p class="text-xs font-bold text-slate-700">조건에 맞는 물품이 없습니다</p>
-            <p class="text-[11px] text-slate-400 mt-1">다른 카테고리나 대여 장소를 선택해 보세요.</p>
+            <p class="text-[11px] text-slate-400 mt-1">다른 카테고리나 대여 장소를 선택하거나 직접 등록해 보세요.</p>
           </div>
         `;
         return;
@@ -708,39 +737,160 @@
       container.innerHTML = filtered.map(item => `
         <div
           onclick="openItemModal(${item.id})"
-          class="p-3 rounded-xl border border-slate-200/80 bg-white hover:border-emerald-400 transition cursor-pointer flex items-center justify-between gap-3 active:scale-[0.99]"
+          class="p-3.5 rounded-2xl border border-slate-200/80 bg-white hover:border-emerald-400 transition cursor-pointer flex items-center justify-between gap-3 active:scale-[0.99]"
         >
           <div class="flex items-center gap-3 min-w-0">
             <div class="w-11 h-11 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
               <i data-lucide="${item.icon}" class="w-5 h-5"></i>
             </div>
             <div class="min-w-0">
-              <div class="flex items-center gap-1.5 mb-0.5">
+              <div class="flex items-center gap-1.5 mb-0.5 flex-wrap">
                 <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
                   ${item.location}
                 </span>
                 <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700">
-                  ${item.subCat}
+                  ${item.subCategory}
+                </span>
+                <span class="text-[10px] font-medium text-slate-400">
+                  수량 ${item.quantity}개
                 </span>
               </div>
-              <h4 class="text-[13px] font-extrabold text-slate-900 truncate">${item.name}</h4>
-              <p class="text-[11px] text-slate-400 truncate mt-0.5">
-                ${item.ownerName} · ${item.ownerPhone}
+              <h4 class="text-[13.5px] font-extrabold text-slate-900 truncate">${item.name}</h4>
+              <p class="text-[11px] text-slate-500 truncate mt-0.5">
+                등록자: <span class="font-semibold text-slate-700">${item.ownerName}</span>
               </p>
             </div>
           </div>
-          <span class="shrink-0 px-2.5 py-1.5 rounded-lg text-[11px] font-bold ${
-            item.available ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-400'
-          }">
-            ${item.available ? '대여' : '대여중'}
-          </span>
+          <button
+            type="button"
+            onclick="event.stopPropagation(); openItemModal(${item.id})"
+            class="shrink-0 px-3 py-1.5 rounded-xl text-xs font-extrabold bg-slate-900 hover:bg-slate-800 text-white transition"
+          >
+            대여
+          </button>
         </div>
       `).join('');
 
       lucide.createIcons();
     }
 
-    // ==================== ITEM DETAIL MODAL (대여 기간: 1일, 2일, 3일 & 연락처 채팅) ====================
+    // ==================== UPLOAD ITEM FORM LOGIC ====================
+    function renderUploadFormOptions() {
+      const uploadCats = ['전자기기', '학습용품', '건강/위생용품', '생활용품'];
+      const catGrid = document.getElementById('upload-cat-grid');
+      catGrid.innerHTML = uploadCats.map(cat => {
+        const active = uploadSelectedCategory === cat;
+        return `
+          <button
+            type="button"
+            onclick="selectUploadCategory('${cat}')"
+            class="py-2.5 px-3 rounded-xl text-xs font-extrabold border transition ${
+              active
+                ? 'bg-slate-900 text-white border-slate-900'
+                : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+            }"
+          >
+            ${cat}
+          </button>
+        `;
+      }).join('');
+
+      const locGrid = document.getElementById('upload-loc-grid');
+      locGrid.innerHTML = uploadLocations.map(loc => {
+        const active = uploadSelectedLocation === loc;
+        return `
+          <button
+            type="button"
+            onclick="selectUploadLocation('${loc}')"
+            class="py-2.5 px-2 rounded-xl text-xs font-extrabold border transition ${
+              active
+                ? 'bg-emerald-600 text-white border-emerald-600'
+                : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+            }"
+          >
+            ${loc}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectUploadCategory(cat) {
+      uploadSelectedCategory = cat;
+      renderUploadFormOptions();
+    }
+
+    function selectUploadLocation(loc) {
+      uploadSelectedLocation = loc;
+      renderUploadFormOptions();
+    }
+
+    function getCategoryIcon(cat) {
+      const map = {
+        '전자기기': 'smartphone',
+        '학습용품': 'calculator',
+        '건강/위생용품': 'heart-pulse',
+        '생활용품': 'umbrella'
+      };
+      return map[cat] || 'package';
+    }
+
+    function handleUploadSubmit(e) {
+      e.preventDefault();
+
+      const ownerName = document.getElementById('upload-owner').value.trim();
+      const itemName = document.getElementById('upload-name').value.trim();
+      const quantity = parseInt(document.getElementById('upload-qty').value, 10) || 1;
+      const descInput = document.getElementById('upload-desc').value.trim();
+
+      if (!ownerName || !itemName) {
+        showToast('등록자 이름과 세부 물품명을 입력해 주세요.');
+        return;
+      }
+
+      // 세부 분류 자동 매칭 (일치 키워드가 없으면 카테고리명으로 표시)
+      const catGroup = categoryGroups.find(c => c.id === uploadSelectedCategory);
+      let matchedSub = uploadSelectedCategory;
+      if (catGroup && catGroup.subItems.length > 0) {
+        const found = catGroup.subItems.find(
+          sub => sub !== '전체' && itemName.toLowerCase().includes(sub.toLowerCase())
+        );
+        if (found) matchedSub = found;
+      }
+
+      const newItem = {
+        id: Date.now(),
+        name: itemName,
+        category: uploadSelectedCategory,
+        subCategory: matchedSub,
+        location: uploadSelectedLocation,
+        quantity: quantity,
+        ownerName: ownerName,
+        icon: getCategoryIcon(uploadSelectedCategory),
+        desc: descInput || `${uploadSelectedLocation}에서 대여 가능합니다. 채팅으로 편하게 문의해 주세요.`
+      };
+
+      rentalItems.unshift(newItem);
+
+      // 폼 초기화
+      document.getElementById('upload-form').reset();
+      document.getElementById('upload-qty').value = 1;
+      uploadSelectedCategory = '전자기기';
+      uploadSelectedLocation = '백경광장';
+      renderUploadFormOptions();
+
+      // 홈 화면 필터 초기화 후 새 목록 반영 및 이동
+      selectedCategory = '전체';
+      selectedSubCategory = '전체';
+      selectedLocation = '전체';
+      renderCategoryTabs();
+      renderLocationPills();
+      renderItemsList();
+
+      switchTab('home');
+      showToast(`'${newItem.name}' 물품이 등록되었습니다!`);
+    }
+
+    // ==================== ITEM DETAIL MODAL (대여 기간: 1일, 2일, 3일 & 이름 기반 채팅) ====================
     function openItemModal(itemId) {
       const item = rentalItems.find(i => i.id === itemId);
       if (!item) return;
@@ -755,11 +905,12 @@
               <i data-lucide="${item.icon}" class="w-6 h-6"></i>
             </div>
             <div>
-              <div class="flex items-center gap-1.5">
+              <div class="flex items-center gap-1.5 flex-wrap">
                 <span class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">${item.location}</span>
-                <span class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700">${item.subCat}</span>
+                <span class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700">${item.subCategory}</span>
+                <span class="text-[11px] font-semibold text-slate-400">수량 ${item.quantity}개</span>
               </div>
-              <h3 class="font-extrabold text-[15px] text-slate-900 mt-1">${item.name}</h3>
+              <h3 class="font-extrabold text-[15.5px] text-slate-900 mt-1">${item.name}</h3>
             </div>
           </div>
           <button onclick="closeItemModal()" class="p-1.5 rounded-full hover:bg-slate-100 text-slate-400">
@@ -771,22 +922,20 @@
           ${item.desc}
         </p>
 
-        <!-- 등록자 연락처 확인 및 복사/전화 -->
-        <div class="bg-emerald-50/60 border border-emerald-200/80 rounded-2xl p-3.5 mb-4 flex items-center justify-between gap-2">
-          <div class="min-w-0">
-            <p class="text-[10.5px] text-emerald-700 font-bold">등록자 연락처</p>
-            <p class="text-[13px] font-extrabold text-slate-900 truncate mt-0.5">${item.ownerName}</p>
-            <p class="text-xs font-mono font-bold text-slate-700 mt-0.5">${item.ownerPhone}</p>
+        <!-- 등록자 정보 (학과 및 연락처 비공개, 이름만 표시) -->
+        <div class="bg-emerald-50/60 border border-emerald-200/80 rounded-2xl p-3.5 mb-4 flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-full bg-white border border-emerald-200 text-emerald-700 flex items-center justify-center font-extrabold text-xs">
+              ${item.ownerName.charAt(0)}
+            </div>
+            <div>
+              <p class="text-[10.5px] text-emerald-700 font-bold">대여 등록자</p>
+              <p class="text-[13.5px] font-extrabold text-slate-900">${item.ownerName}</p>
+            </div>
           </div>
-          <div class="flex items-center gap-1.5 shrink-0">
-            <button type="button" onclick="copyPhoneNumber('${item.ownerPhone}')" class="px-2.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 text-[11px] font-bold active:scale-95 transition">
-              번호복사
-            </button>
-            <a href="tel:${item.ownerPhone}" class="px-2.5 py-2 rounded-xl bg-emerald-600 text-white text-[11px] font-bold flex items-center gap-1 active:scale-95 transition">
-              <i data-lucide="phone" class="w-3 h-3"></i>
-              전화
-            </a>
-          </div>
+          <span class="text-[11px] font-semibold text-slate-500 bg-white px-2.5 py-1 rounded-lg border border-slate-200/80">
+            인앱 채팅 연결
+          </span>
         </div>
 
         <!-- 물품 대여 기간 (1일, 2일, 3일만 제공) -->
@@ -813,12 +962,13 @@
         </div>
 
         <button
+          id="modal-chat-btn"
           type="button"
           onclick="startChatWithOwner(${item.id})"
           class="w-full py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.99] transition"
         >
           <i data-lucide="message-circle" class="w-4 h-4 text-emerald-400"></i>
-          연락처로 채팅하기 (${selectedDuration} 대여 문의)
+          ${item.ownerName}님과 채팅하기 (${selectedDuration} 대여)
         </button>
       `;
 
@@ -836,12 +986,13 @@
             : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
         }`;
       });
-      // 하단 버튼 텍스트의 대여 기간도 실시간 반영
-      const chatBtn = document.querySelector('#item-modal-body button[onclick^="startChatWithOwner"]');
+      const chatBtn = document.getElementById('modal-chat-btn');
       if (chatBtn) {
+        const currentText = chatBtn.textContent.trim();
+        const namePart = currentText.split('님과')[0];
         chatBtn.innerHTML = `
           <i data-lucide="message-circle" class="w-4 h-4 text-emerald-400"></i>
-          연락처로 채팅하기 (${selectedDuration} 대여 문의)
+          ${namePart}님과 채팅하기 (${selectedDuration} 대여)
         `;
         lucide.createIcons();
       }
@@ -851,7 +1002,7 @@
       document.getElementById('item-modal').classList.add('hidden');
     }
 
-    // ==================== CONTACT-BASED CHAT LOGIC ====================
+    // ==================== NAME-BASED IN-APP CHAT LOGIC ====================
     function startChatWithOwner(itemId) {
       const item = rentalItems.find(i => i.id === itemId);
       if (!item) return;
@@ -864,7 +1015,6 @@
           itemName: item.name,
           location: item.location,
           ownerName: item.ownerName,
-          ownerPhone: item.ownerPhone,
           messages: [
             {
               sender: 'other',
@@ -902,7 +1052,7 @@
                 : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
             }"
           >
-            <p class="text-xs font-extrabold">${room.ownerName.split(' ')[0]} · ${room.location}</p>
+            <p class="text-xs font-extrabold">${room.ownerName} · ${room.location}</p>
             <p class="text-[10px] ${isActive ? 'text-emerald-300' : 'text-slate-400'} truncate max-w-[130px]">
               ${room.itemName}
             </p>
@@ -921,34 +1071,22 @@
       const room = chatRooms.find(r => r.id === activeChatRoomId) || chatRooms[0];
       if (!room) return;
 
-      const headerEl = document.getElementById('active-contact-header');
+      const headerEl = document.getElementById('active-chat-header');
       headerEl.innerHTML = `
         <div class="flex items-center justify-between gap-2">
-          <div class="min-w-0">
-            <div class="flex items-center gap-1.5">
-              <span class="text-xs font-extrabold text-slate-900 truncate">${room.ownerName}</span>
-              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-white text-emerald-700 border border-emerald-200">${room.location}</span>
+          <div class="flex items-center gap-2.5 min-w-0">
+            <div class="w-8 h-8 rounded-full bg-white border border-emerald-200 text-emerald-700 flex items-center justify-center font-extrabold text-xs shrink-0">
+              ${room.ownerName.charAt(0)}
             </div>
-            <p class="text-xs font-mono font-bold text-slate-700 mt-0.5 flex items-center gap-1">
-              <i data-lucide="phone" class="w-3 h-3 text-emerald-600"></i>
-              ${room.ownerPhone}
-            </p>
-          </div>
-          <div class="flex items-center gap-1.5 shrink-0">
-            <button
-              type="button"
-              onclick="copyPhoneNumber('${room.ownerPhone}')"
-              class="px-2.5 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-[11px] font-bold active:scale-95 transition"
-            >
-              연락처 복사
-            </button>
-            <a
-              href="tel:${room.ownerPhone}"
-              class="px-2.5 py-1.5 rounded-xl bg-emerald-600 text-white text-[11px] font-bold flex items-center gap-1 active:scale-95 transition"
-            >
-              <i data-lucide="phone-call" class="w-3 h-3"></i>
-              전화
-            </a>
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5">
+                <span class="text-xs font-extrabold text-slate-900 truncate">${room.ownerName}</span>
+                <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-white text-emerald-700 border border-emerald-200">${room.location}</span>
+              </div>
+              <p class="text-[11px] font-medium text-slate-600 truncate mt-0.5">
+                ${room.itemName}
+              </p>
+            </div>
           </div>
         </div>
       `;
@@ -998,19 +1136,6 @@
       renderActiveChat();
     }
 
-    function shareMyContact() {
-      const room = chatRooms.find(r => r.id === activeChatRoomId);
-      if (!room) return;
-
-      room.messages.push({
-        sender: 'me',
-        text: '📱 [내 번호 전송] 부경대 재학생 / 010-7788-1234 (급하시면 문자나 전화 주세요!)',
-        time: getCurrentTime()
-      });
-      renderActiveChat();
-      showToast('내 연락처 정보가 채팅창에 전송되었습니다.');
-    }
-
     function insertQuickText(text) {
       const input = document.getElementById('chat-input');
       input.value = text;
@@ -1021,16 +1146,6 @@
     function getCurrentTime() {
       const now = new Date();
       return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-    }
-
-    function copyPhoneNumber(phone) {
-      const tempInput = document.createElement('input');
-      tempInput.value = phone;
-      document.body.appendChild(tempInput);
-      tempInput.select();
-      document.execCommand('copy');
-      document.body.removeChild(tempInput);
-      showToast(`연락처(${phone})가 복사되었습니다.`);
     }
 
     let toastTimeout;
